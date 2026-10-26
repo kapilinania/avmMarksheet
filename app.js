@@ -1665,6 +1665,14 @@ function setupEventListeners() {
     });
   }
 
+  const marksheetScopeSelect = document.getElementById("marksheetExamScopeSelect");
+  if (marksheetScopeSelect) {
+    marksheetScopeSelect.addEventListener("change", (e) => {
+      state.marksheetScope = e.target.value;
+      renderCurrentMarksheetView();
+    });
+  }
+
   // Close modals on Escape
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
@@ -2012,60 +2020,92 @@ function escapeHtml(str) {
 
 /**
  * ============================================================================
- * LANDSCAPE ANNUAL MARKSHEET GENERATION ENGINE (Individual & Whole Class)
+ * LANDSCAPE MARKSHEET GENERATION ENGINE (Selectable Exam Scopes & Batch Print)
  * ============================================================================
  */
+
+state.marksheetScope = "all";
+state.marksheetTarget = { type: "class", sno: null };
 
 /**
  * Open Landscape Marksheet for an Individual Student
  */
-window.openSingleStudentMarksheet = function(sno) {
+window.openSingleStudentMarksheet = function(sno, preferredScope) {
   const student = state.students.find(s => s.sno === Number(sno));
   if (!student) {
     showToast("Student records not found.", "error");
     return;
   }
 
+  state.marksheetTarget = { type: "individual", sno: Number(sno) };
+  if (preferredScope) {
+    state.marksheetScope = preferredScope;
+  }
+
   const modal = document.getElementById("marksheetModal");
-  const container = document.getElementById("marksheetPrintContainer");
-  const heading = document.getElementById("marksheetToolbarHeading");
-  const countChip = document.getElementById("marksheetCountChip");
+  if (modal) {
+    modal.style.display = "block";
+    document.body.style.overflow = "hidden";
+  }
 
-  if (!modal || !container) return;
-
-  heading.textContent = `${student.studentName} — Annual Marksheet`;
-  countChip.textContent = `Individual (SR: ${student.srNo || "—"})`;
-
-  container.innerHTML = buildStudentLandscapeMarksheetHtml(student);
-  modal.style.display = "block";
-  document.body.style.overflow = "hidden";
+  renderCurrentMarksheetView();
 };
 
 /**
  * Open Landscape Marksheet for Entire Class in One Click
  */
-window.openClassMarksheets = function() {
+window.openClassMarksheets = function(preferredScope) {
   const students = state.students;
   if (!students || students.length === 0) {
     showToast(`No student records loaded for Class ${state.currentClass}.`, "warning");
     return;
   }
 
+  state.marksheetTarget = { type: "class", sno: null };
+  if (preferredScope) {
+    state.marksheetScope = preferredScope;
+  }
+
   const modal = document.getElementById("marksheetModal");
+  if (modal) {
+    modal.style.display = "block";
+    document.body.style.overflow = "hidden";
+  }
+
+  renderCurrentMarksheetView();
+  showToast(`Generated ${students.length} marksheets for Class ${state.currentClass}! Ready to Print / PDF.`, "success");
+};
+
+/**
+ * Render Current Marksheet View (Individual or Class) Based on Selected Exam Scope
+ */
+function renderCurrentMarksheetView() {
   const container = document.getElementById("marksheetPrintContainer");
   const heading = document.getElementById("marksheetToolbarHeading");
   const countChip = document.getElementById("marksheetCountChip");
+  const scopeSelect = document.getElementById("marksheetExamScopeSelect");
 
-  if (!modal || !container) return;
+  if (!container) return;
 
-  heading.textContent = `Class ${state.currentClass} — Batch Annual Marksheets`;
-  countChip.textContent = `${students.length} Students (Whole Class)`;
+  const scope = state.marksheetScope || "all";
+  if (scopeSelect && scopeSelect.value !== scope) {
+    scopeSelect.value = scope;
+  }
 
-  container.innerHTML = students.map(st => buildStudentLandscapeMarksheetHtml(st)).join("");
-  modal.style.display = "block";
-  document.body.style.overflow = "hidden";
-  showToast(`Generated ${students.length} landscape marksheets for Class ${state.currentClass}! Ready to Print / PDF.`, "success");
-};
+  if (state.marksheetTarget.type === "individual") {
+    const student = state.students.find(s => s.sno === Number(state.marksheetTarget.sno));
+    if (!student) return;
+
+    if (heading) heading.textContent = `${student.studentName} — Marksheet Preview`;
+    if (countChip) countChip.textContent = `Individual (SR: ${student.srNo || "—"})`;
+    container.innerHTML = buildStudentLandscapeMarksheetHtml(student, scope);
+  } else {
+    const students = state.students;
+    if (heading) heading.textContent = `Class ${state.currentClass} — Batch Marksheets`;
+    if (countChip) countChip.textContent = `${students.length} Students (Whole Class)`;
+    container.innerHTML = students.map(st => buildStudentLandscapeMarksheetHtml(st, scope)).join("");
+  }
+}
 
 /**
  * Helper to safely extract and format mark value or output dash '-'
@@ -2113,112 +2153,313 @@ function getMarksheetSubjectExam(student, subj, examKey) {
     const hasAny = (tVal !== null || pVal !== null);
     const sum = hasAny ? ((tVal || 0) + (pVal || 0)) : null;
 
+    let detailStr = "";
+    if (hasAny && tMax > 0 && pMax > 0) {
+      detailStr = ` (T:${tVal !== null ? tVal : '—'}, P:${pVal !== null ? pVal : '—'})`;
+    }
+
     return {
       max: totalMax,
       obt: sum,
+      detail: detailStr,
       formatted: sum !== null ? String(sum) : `<span class="mark-dash">—</span>`
     };
   }
 }
 
 /**
- * Build Single Student Landscape Marksheet HTML String
+ * Get Marksheet Title based on Scope
  */
-function buildStudentLandscapeMarksheetHtml(student) {
-  const exams = [
-    { key: "firstTest", label: "1st Test" },
-    { key: "secondTest", label: "2nd Test" },
-    { key: "halfYearly", label: "Half-Yearly" },
-    { key: "thirdTest", label: "3rd Test" },
-    { key: "annualExam", label: "Annual Exam" }
-  ];
+function getMarksheetReportTitle(scope) {
+  switch (scope) {
+    case "firstTest":
+      return "1ST PERIODIC TEST REPORT CARD • SESSION 2026–27";
+    case "secondTest":
+      return "2ND PERIODIC TEST REPORT CARD • SESSION 2026–27";
+    case "halfYearly":
+      return "HALF-YEARLY EXAMINATION REPORT CARD • SESSION 2026–27";
+    case "thirdTest":
+      return "3RD PERIODIC TEST REPORT CARD • SESSION 2026–27";
+    case "annualExam":
+      return "ANNUAL EXAMINATION REPORT CARD • SESSION 2026–27";
+    case "cumulativeHalfYearly":
+      return "HALF-YEARLY CUMULATIVE PROGRESS REPORT • SESSION 2026–27";
+    case "cumulativeThirdTest":
+      return "3RD PERIODIC CUMULATIVE PROGRESS REPORT • SESSION 2026–27";
+    case "all":
+    default:
+      return "ANNUAL PROGRESS REPORT &amp; MARKSHEET • SESSION 2026–27";
+  }
+}
+
+/**
+ * Build Single Student Landscape Marksheet HTML String based on Exam Scope
+ */
+function buildStudentLandscapeMarksheetHtml(student, scope = "all") {
+  const isSingleExam = ["firstTest", "secondTest", "halfYearly", "thirdTest", "annualExam"].includes(scope);
+
+  const reportTitle = getMarksheetReportTitle(scope);
+  const issueDate = new Date().toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
 
   let grandMax = 0;
   let grandObtained = 0;
   let anyMarksEntered = false;
 
-  let tableRowsHtml = "";
+  let tableHtml = "";
 
-  EVALUATION_SUBJECTS.forEach((subj, idx) => {
-    let subjYearlyMax = 0;
-    let subjYearlyObt = 0;
-    let subjHasMarks = false;
+  if (isSingleExam) {
+    // ==========================================
+    // 1. SINGLE EXAM MARKSHEET TABLE LAYOUT
+    // ==========================================
+    let rowsHtml = "";
 
-    let cellsHtml = "";
+    EVALUATION_SUBJECTS.forEach((subj, idx) => {
+      const data = getMarksheetSubjectExam(student, subj, scope);
+      grandMax += data.max;
 
-    exams.forEach(ex => {
-      const data = getMarksheetSubjectExam(student, subj, ex.key);
-      subjYearlyMax += data.max;
+      let pctStr = `<span class="mark-dash">—</span>`;
+      let gradeStr = `<span class="mark-dash">—</span>`;
+      let assessmentStr = `<span class="mark-dash">—</span>`;
 
-      if (data.obt !== null) {
-        subjYearlyObt += data.obt;
-        subjHasMarks = true;
+      if (data.obt !== null && data.max > 0) {
         anyMarksEntered = true;
+        grandObtained += data.obt;
+        const pct = (data.obt / data.max) * 100;
+        pctStr = pct.toFixed(1) + "%";
+        gradeStr = computeGrade(pct);
+
+        if (pct >= 90) assessmentStr = "Outstanding / उत्कृष्ट";
+        else if (pct >= 75) assessmentStr = "Excellent / अति उत्तम";
+        else if (pct >= 60) assessmentStr = "Very Good / उत्तम";
+        else if (pct >= 45) assessmentStr = "Good / अच्छा";
+        else if (pct >= 33) assessmentStr = "Satisfactory / संतोषजनक";
+        else assessmentStr = "Needs Improvement / सुधार आवश्यक";
       }
 
       const displayMax = data.max > 0 ? String(data.max) : `<span class="mark-dash">—</span>`;
-      cellsHtml += `
-        <td class="max-cell">${displayMax}</td>
-        <td class="obt-cell">${data.formatted}</td>
+      const obtWithDetail = data.detail ? `${data.formatted}<small style="color:#64748b; font-size:0.68rem;">${data.detail}</small>` : data.formatted;
+
+      rowsHtml += `
+        <tr>
+          <td style="font-weight:700; color:#64748b; text-align:center;">${idx + 1}</td>
+          <td class="subj-cell">${escapeHtml(subj.name)}</td>
+          <td class="max-cell" style="text-align:center;">${displayMax}</td>
+          <td class="obt-cell" style="text-align:center;">${obtWithDetail}</td>
+          <td style="text-align:center; font-weight:700; color:#1e40af;">${pctStr}</td>
+          <td class="grade-cell" style="text-align:center;">${gradeStr}</td>
+          <td style="text-align:left; padding-left:12px; font-weight:600; font-size:0.72rem; color:#334155;">${assessmentStr}</td>
+        </tr>
       `;
     });
 
-    grandMax += subjYearlyMax;
-    if (subjHasMarks) {
-      grandObtained += subjYearlyObt;
+    const overallPercentage = (anyMarksEntered && grandMax > 0)
+      ? ((grandObtained / grandMax) * 100).toFixed(1)
+      : "—";
+
+    const overallGrade = overallPercentage !== "—" ? computeGrade(Number(overallPercentage)) : "—";
+
+    tableHtml = `
+      <table class="ms-marks-table ms-single-table">
+        <thead>
+          <tr>
+            <th style="width: 45px;">#</th>
+            <th class="th-subject" style="width: 28%;">Subject Name</th>
+            <th style="width: 100px;">Maximum Marks</th>
+            <th style="width: 130px;">Marks Obtained</th>
+            <th style="width: 95px;">Percentage</th>
+            <th style="width: 75px;">Grade</th>
+            <th style="text-align: left; padding-left: 12px;">Performance Evaluation</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="2" class="total-title">Total Marks (पूर्णांक / प्राप्तांक)</th>
+            <th class="agg-max-cell" style="font-size:0.8rem; text-align:center;">${grandMax}</th>
+            <th class="total-highlight" style="text-align:center;">${anyMarksEntered ? grandObtained : '<span class="mark-dash">—</span>'}</th>
+            <th style="font-size:0.8rem; font-weight:800; color:#1e40af; text-align:center;">${overallPercentage !== "—" ? overallPercentage + "%" : "—"}</th>
+            <th class="grade-cell" style="font-size:0.82rem; text-align:center;">${overallGrade}</th>
+            <th style="text-align:left; padding-left:12px; font-size:0.74rem; font-weight:800; color:#065f46;">
+              ${anyMarksEntered ? "Exam Evaluation Completed" : "Marks Pending"}
+            </th>
+          </tr>
+        </tfoot>
+      </table>
+    `;
+
+  } else {
+    // ==========================================
+    // 2. MULTI-EXAM / CUMULATIVE MARKSHEET TABLE
+    // ==========================================
+    let includedExams = [];
+    let totalColLabel = "Yearly Total";
+
+    if (scope === "cumulativeHalfYearly") {
+      includedExams = [
+        { key: "firstTest", label: "1st Periodic" },
+        { key: "secondTest", label: "2nd Periodic" },
+        { key: "halfYearly", label: "Half-Yearly" }
+      ];
+      totalColLabel = "Half-Yearly Total";
+    } else if (scope === "cumulativeThirdTest") {
+      includedExams = [
+        { key: "firstTest", label: "1st Periodic" },
+        { key: "secondTest", label: "2nd Periodic" },
+        { key: "halfYearly", label: "Half-Yearly" },
+        { key: "thirdTest", label: "3rd Periodic" }
+      ];
+      totalColLabel = "Total (Till 3rd Test)";
+    } else {
+      // All 5 exams
+      includedExams = [
+        { key: "firstTest", label: "1st Periodic" },
+        { key: "secondTest", label: "2nd Periodic" },
+        { key: "halfYearly", label: "Half-Yearly" },
+        { key: "thirdTest", label: "3rd Periodic" },
+        { key: "annualExam", label: "Annual Exam" }
+      ];
+      totalColLabel = "Yearly Total";
     }
 
-    const yearlyObtFormatted = subjHasMarks ? String(subjYearlyObt) : `<span class="mark-dash">—</span>`;
-    const yearlyGrade = (subjHasMarks && subjYearlyMax > 0)
-      ? computeGrade((subjYearlyObt / subjYearlyMax) * 100)
-      : `<span class="mark-dash">—</span>`;
+    let rowsHtml = "";
 
-    tableRowsHtml += `
-      <tr>
-        <td style="font-weight:700; color:#64748b;">${idx + 1}</td>
-        <td class="subj-cell">${escapeHtml(subj.name)}</td>
-        ${cellsHtml}
-        <td class="agg-max-cell">${subjYearlyMax}</td>
-        <td class="agg-obt-cell">${yearlyObtFormatted}</td>
-        <td class="grade-cell">${yearlyGrade}</td>
-      </tr>
+    EVALUATION_SUBJECTS.forEach((subj, idx) => {
+      let subjTermMax = 0;
+      let subjTermObt = 0;
+      let subjHasMarks = false;
+
+      let cellsHtml = "";
+
+      includedExams.forEach(ex => {
+        const data = getMarksheetSubjectExam(student, subj, ex.key);
+        subjTermMax += data.max;
+
+        if (data.obt !== null) {
+          subjTermObt += data.obt;
+          subjHasMarks = true;
+          anyMarksEntered = true;
+        }
+
+        const displayMax = data.max > 0 ? String(data.max) : `<span class="mark-dash">—</span>`;
+        cellsHtml += `
+          <td class="max-cell">${displayMax}</td>
+          <td class="obt-cell">${data.formatted}</td>
+        `;
+      });
+
+      grandMax += subjTermMax;
+      if (subjHasMarks) {
+        grandObtained += subjTermObt;
+      }
+
+      const termObtFormatted = subjHasMarks ? String(subjTermObt) : `<span class="mark-dash">—</span>`;
+      const termGrade = (subjHasMarks && subjTermMax > 0)
+        ? computeGrade((subjTermObt / subjTermMax) * 100)
+        : `<span class="mark-dash">—</span>`;
+
+      rowsHtml += `
+        <tr>
+          <td style="font-weight:700; color:#64748b; text-align:center;">${idx + 1}</td>
+          <td class="subj-cell">${escapeHtml(subj.name)}</td>
+          ${cellsHtml}
+          <td class="agg-max-cell">${subjTermMax}</td>
+          <td class="agg-obt-cell">${termObtFormatted}</td>
+          <td class="grade-cell">${termGrade}</td>
+        </tr>
+      `;
+    });
+
+    const overallPercentage = (anyMarksEntered && grandMax > 0)
+      ? ((grandObtained / grandMax) * 100).toFixed(1)
+      : "—";
+
+    const overallGrade = overallPercentage !== "—" ? computeGrade(Number(overallPercentage)) : "—";
+
+    tableHtml = `
+      <table class="ms-marks-table">
+        <thead>
+          <tr>
+            <th rowspan="2" class="th-sno">#</th>
+            <th rowspan="2" class="th-subject">Subject</th>
+            ${includedExams.map(e => `<th colspan="2">${e.label}</th>`).join("")}
+            <th colspan="2" style="background:#0f2b66;">${totalColLabel}</th>
+            <th rowspan="2" style="width:48px;">Grade</th>
+          </tr>
+          <tr class="sub-head-row">
+            ${includedExams.map(() => `<th>Max</th><th>Obt</th>`).join("")}
+            <th style="background:#1e3a8a;">Max</th>
+            <th style="background:#1e3a8a;">Obt</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="2" class="total-title">Grand Total (पूर्णांक / प्राप्तांक)</th>
+            <th colspan="${includedExams.length * 2}" style="text-align: right; font-weight: 700; color: #475569; padding-right: 10px;">
+              Aggregate Across Included Terms:
+            </th>
+            <th class="agg-max-cell" style="font-size:0.8rem;">${grandMax}</th>
+            <th class="total-highlight">${anyMarksEntered ? grandObtained : '<span class="mark-dash">—</span>'}</th>
+            <th class="grade-cell" style="font-size:0.82rem;">${overallGrade}</th>
+          </tr>
+        </tfoot>
+      </table>
     `;
-  });
+  }
 
-  // Calculate Grand Totals & Aggregate Results
+  // Calculate Overall Percent, Rank and Result
   const overallPercentage = (anyMarksEntered && grandMax > 0)
     ? ((grandObtained / grandMax) * 100).toFixed(1)
     : "—";
 
-  const overallGrade = overallPercentage !== "—" ? computeGrade(Number(overallPercentage)) : "—";
-
-  // Rank Calculation
-  const rankVal = student.positions?.finalPosition 
-    || getStudentRankForExam(student, "annualExam") 
-    || getStudentRankForExam(student, "halfYearly") 
-    || "—";
+  // Rank Calculation based on scope
+  let rankVal = "—";
+  if (scope === "all") {
+    rankVal = student.positions?.finalPosition 
+      || getStudentRankForExam(student, "annualExam") 
+      || getStudentRankForExam(student, "halfYearly") 
+      || "—";
+  } else if (scope === "cumulativeHalfYearly" || scope === "halfYearly") {
+    rankVal = student.positions?.halfYearly || getStudentRankForExam(student, "halfYearly") || "—";
+  } else if (scope === "cumulativeThirdTest" || scope === "thirdTest") {
+    rankVal = student.positions?.thirdPeriodic || getStudentRankForExam(student, "thirdTest") || "—";
+  } else if (scope === "firstTest") {
+    rankVal = student.positions?.firstPeriodic || getStudentRankForExam(student, "firstTest") || "—";
+  } else if (scope === "secondTest") {
+    rankVal = student.positions?.secondPeriodic || getStudentRankForExam(student, "secondTest") || "—";
+  }
   const rankDisplay = rankVal && rankVal !== "—" ? `Rank #${rankVal}` : "—";
 
   // Division / Result status
   let resultText = "EVALUATION IN PROGRESS";
   if (overallPercentage !== "—") {
     const pctNum = Number(overallPercentage);
-    if (pctNum >= 60) {
-      resultText = "PASSED (FIRST DIVISION • प्रथम श्रेणी)";
-    } else if (pctNum >= 45) {
-      resultText = "PASSED (SECOND DIVISION • द्वितीय श्रेणी)";
-    } else if (pctNum >= 33) {
-      resultText = "PASSED (THIRD DIVISION • तृतीय श्रेणी)";
+    if (scope === "all") {
+      if (pctNum >= 60) {
+        resultText = "PASSED (FIRST DIVISION • प्रथम श्रेणी)";
+      } else if (pctNum >= 45) {
+        resultText = "PASSED (SECOND DIVISION • द्वितीय श्रेणी)";
+      } else if (pctNum >= 33) {
+        resultText = "PASSED (THIRD DIVISION • तृतीय श्रेणी)";
+      } else {
+        resultText = "NEEDS IMPROVEMENT (आवश्यक सुधार)";
+      }
     } else {
-      resultText = "NEEDS IMPROVEMENT (आवश्यक सुधार)";
+      if (pctNum >= 33) {
+        resultText = "QUALIFIED / EVALUATED (संतोषजनक)";
+      } else {
+        resultText = "NEEDS IMPROVEMENT (सुधार आवश्यक)";
+      }
     }
   }
-
-  const issueDate = new Date().toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric"
-  });
 
   return `
     <article class="marksheet-sheet-page">
@@ -2234,7 +2475,7 @@ function buildStudentLandscapeMarksheetHtml(student) {
             <h1 class="ms-school-name">ADARSH VIDYA MANDIR SECONDARY SCHOOL</h1>
             <p class="ms-school-sub">SOORSAGAR, JODHPUR (RAJASTHAN) • PH: 0291-2431000</p>
             <span class="ms-affiliation">Recognized by Govt. of Rajasthan • Affiliated to RBSE (Ajmer)</span>
-            <h2 class="ms-report-title">ANNUAL PROGRESS REPORT &amp; MARKSHEET • SESSION 2026–27</h2>
+            <h2 class="ms-report-title">${reportTitle}</h2>
           </div>
           <div class="ms-photo-col">
             <div class="ms-photo-box">
@@ -2279,45 +2520,8 @@ function buildStudentLandscapeMarksheetHtml(student) {
           </tbody>
         </table>
 
-        <!-- 3. Academic Marks Table till Yearly Exam -->
-        <table class="ms-marks-table">
-          <thead>
-            <tr>
-              <th rowspan="2" class="th-sno">#</th>
-              <th rowspan="2" class="th-subject">Subject</th>
-              <th colspan="2">1st Periodic</th>
-              <th colspan="2">2nd Periodic</th>
-              <th colspan="2">Half-Yearly</th>
-              <th colspan="2">3rd Periodic</th>
-              <th colspan="2">Annual Exam</th>
-              <th colspan="2" style="background:#0f2b66;">Yearly Total</th>
-              <th rowspan="2" style="width:48px;">Grade</th>
-            </tr>
-            <tr class="sub-head-row">
-              <th>Max</th><th>Obt</th>
-              <th>Max</th><th>Obt</th>
-              <th>Max</th><th>Obt</th>
-              <th>Max</th><th>Obt</th>
-              <th>Max</th><th>Obt</th>
-              <th style="background:#1e3a8a;">Max</th>
-              <th style="background:#1e3a8a;">Obt</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRowsHtml}
-          </tbody>
-          <tfoot>
-            <tr>
-              <th colspan="2" class="total-title">Grand Total (पूर्णांक / प्राप्तांक)</th>
-              <th colspan="10" style="text-align: right; font-weight: 700; color: #475569; padding-right: 10px;">
-                Grand Aggregate Across All Terms:
-              </th>
-              <th class="agg-max-cell" style="font-size:0.8rem;">${grandMax}</th>
-              <th class="total-highlight">${anyMarksEntered ? grandObtained : '<span class="mark-dash">—</span>'}</th>
-              <th class="grade-cell" style="font-size:0.82rem;">${overallGrade}</th>
-            </tr>
-          </tfoot>
-        </table>
+        <!-- 3. Academic Marks Table -->
+        ${tableHtml}
 
         <!-- 4. Co-Scholastic & Assessment Summary -->
         <div class="ms-coscholastic-row">

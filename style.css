@@ -2795,6 +2795,68 @@ body {
   flex-shrink: 0;
 }
 
+.toolbar-left-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.toolbar-scope-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+}
+
+.scope-select-lbl {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.marksheet-scope-dropdown {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-xs);
+  padding: 5px 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #0f172a;
+  outline: none;
+  cursor: pointer;
+  min-width: 250px;
+}
+
+.marksheet-scope-dropdown:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+@media (max-width: 820px) {
+  .marksheet-top-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+  .toolbar-scope-group {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .marksheet-scope-dropdown {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
 .marksheet-toolbar-title {
   display: flex;
   align-items: center;
