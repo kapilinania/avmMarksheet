@@ -1,0 +1,686 @@
+[
+  {
+    "rowNumber": 4,
+    "sno": 1,
+    "session": "2026-27",
+    "nicId": "510564022",
+    "srNo": "1278",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "HARDIK GEHLOT",
+    "fatherName": "SUBHASH GEHLOT",
+    "motherName": "LALITA",
+    "dob": "10/7/2013",
+    "gender": "Male",
+    "category": "OBC",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 5,
+    "sno": 2,
+    "session": "2026-27",
+    "nicId": "510567117",
+    "srNo": "1279",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "SONAKSHI",
+    "fatherName": "SAMPAT PRAJAPAT",
+    "motherName": "JYOTI PRAJAPAT",
+    "dob": "16/01/2013",
+    "gender": "Female",
+    "category": "OBC",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 6,
+    "sno": 3,
+    "session": "2026-27",
+    "nicId": "519430495",
+    "srNo": "1299/23",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "Jitu",
+    "fatherName": "Shrwan",
+    "motherName": "Kiran",
+    "dob": "22/10/2012",
+    "gender": "Male",
+    "category": "ST",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 7,
+    "sno": 4,
+    "session": "2026-27",
+    "nicId": "519430514",
+    "srNo": "1310/24",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "Deepika",
+    "fatherName": "Kishan",
+    "motherName": "Dhannu Devi",
+    "dob": "1/1/2013",
+    "gender": "Female",
+    "category": "ST",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 8,
+    "sno": 5,
+    "session": "2026-27",
+    "nicId": "519499199",
+    "srNo": "1329/26",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "Janwi",
+    "fatherName": "Mohan Ram",
+    "motherName": "Leela",
+    "dob": "18/03/2012",
+    "gender": "Female",
+    "category": "ST",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 9,
+    "sno": 6,
+    "session": "2026-27",
+    "nicId": "523467011",
+    "srNo": "1416",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "TANISHA",
+    "fatherName": "GANPAT MEGHAWAL",
+    "motherName": "REKHA",
+    "dob": "28/01/2011",
+    "gender": "Female",
+    "category": "SC",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 10,
+    "sno": 7,
+    "session": "2026-27",
+    "nicId": "532677740",
+    "srNo": "1501",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "YASHASVI",
+    "fatherName": "JETHA RAM",
+    "motherName": "HEMLATA",
+    "dob": "16/10/2015",
+    "gender": "Female",
+    "category": "SC",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 11,
+    "sno": 8,
+    "session": "2026-27",
+    "nicId": "534595971",
+    "srNo": "1537",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "MANVI",
+    "fatherName": "DHANRAJ GEHLOT",
+    "motherName": "CHAMPA",
+    "dob": "7/12/2012",
+    "gender": "Female",
+    "category": "OBC",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 12,
+    "sno": 9,
+    "session": "2026-27",
+    "nicId": "537575142",
+    "srNo": "1605",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "NIKUNJ VAISHNAV",
+    "fatherName": "MUKESH VAISHNAV",
+    "motherName": "MEENAKSHI VAISHNAV",
+    "dob": "29/01/2011",
+    "gender": "Female",
+    "category": "OBC",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 13,
+    "sno": 10,
+    "session": "2026-27",
+    "nicId": "537846671",
+    "srNo": "1634",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "KULDEEP",
+    "fatherName": "SONARAM",
+    "motherName": "SUSHILA",
+    "dob": "22/06/2012",
+    "gender": "Male",
+    "category": "SC",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 14,
+    "sno": 11,
+    "session": "2026-27",
+    "nicId": "537980398",
+    "srNo": "1641",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "MOHIT",
+    "fatherName": "DURGESH KUMAR",
+    "motherName": "ANU DEVI",
+    "dob": "30/08/2011",
+    "gender": "Male",
+    "category": "OBC",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 15,
+    "sno": 12,
+    "session": "2026-27",
+    "nicId": "543218809",
+    "srNo": "1805",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "RESHMA",
+    "fatherName": "BALU RAM",
+    "motherName": "TARA",
+    "dob": "29/09/2011",
+    "gender": "Female",
+    "category": "OBC",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 16,
+    "sno": 13,
+    "session": "2026-27",
+    "nicId": "543218821",
+    "srNo": "1806",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "KHUSHI",
+    "fatherName": "MANISH JAVA",
+    "motherName": "KAJAL",
+    "dob": "17/01/2010",
+    "gender": "Female",
+    "category": "OBC",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 17,
+    "sno": 14,
+    "session": "2026-27",
+    "nicId": "545015050",
+    "srNo": "1850",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "PRAVEEN",
+    "fatherName": "JASRAJ",
+    "motherName": "PREMLATA",
+    "dob": "25/07/2012",
+    "gender": "Male",
+    "category": "GENERAL",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 18,
+    "sno": 15,
+    "session": "2026-27",
+    "nicId": "547421776",
+    "srNo": "1879",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "MAYANK",
+    "fatherName": "ARJUN LAL SOLANKI",
+    "motherName": "HEMLATA",
+    "dob": "12/1/2012",
+    "gender": "Male",
+    "category": "SC",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 19,
+    "sno": 16,
+    "session": "2026-27",
+    "nicId": "548387352",
+    "srNo": "1900",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "TWINKLE PANDIT",
+    "fatherName": "PREM KISHAN PANDIT",
+    "motherName": "DIVIKSHA PANDIT",
+    "dob": "20/02/2011",
+    "gender": "Female",
+    "category": "SC",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 20,
+    "sno": 17,
+    "session": "2026-27",
+    "nicId": "548671151",
+    "srNo": "1916",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "Rajesh",
+    "fatherName": "KANA RAM",
+    "motherName": "REKHA",
+    "dob": "16/05/2011",
+    "gender": "Male",
+    "category": "GENERAL",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  },
+  {
+    "rowNumber": 21,
+    "sno": 18,
+    "session": "2026-27",
+    "nicId": "549286491",
+    "srNo": "1935",
+    "rollNo": "",
+    "adharNo": "",
+    "className": "Ninth",
+    "studentName": "NIRMAL",
+    "fatherName": "SHRAWAN KUMAR",
+    "motherName": "KANCHAN DEVI",
+    "dob": "22/03/2014",
+    "gender": "Male",
+    "category": "GENERAL",
+    "positions": {
+      "firstPeriodic": "",
+      "secondPeriodic": "",
+      "halfYearly": "",
+      "thirdPeriodic": "",
+      "finalPosition": ""
+    },
+    "marks": {
+      "firstTest": {
+        "hindi": "",
+        "english": "",
+        "sanskrit": "",
+        "science": "",
+        "socialScience": "",
+        "physicalEducation_theo": "",
+        "physicalEducation_prac": "",
+        "itConcept_theo": "",
+        "itConcept_prac": "",
+        "supw": "",
+        "artEducation": ""
+      }
+    }
+  }
+]

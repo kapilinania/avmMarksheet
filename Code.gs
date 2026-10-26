@@ -1,0 +1,1144 @@
+/**
+ * ============================================================================
+ * AVM SCHOOL MARKSHEET MANAGEMENT SYSTEM - GOOGLE APPS SCRIPT
+ * ============================================================================
+ * 
+ * Complete API for Google Sheets:
+ * - Scans and supports Class 1 to 10 sheets automatically.
+ * - Extracts all student details (A-M) and all subject marks (including Maths).
+ * - Dynamic Subject Column Detection (finds Maths wherever inserted in headers).
+ * - Automatic Audit Logging (Cell Comments, End of Class Sheet Columns, & 'Information Sheet' Tab).
+ * - Auto-detects Editor Phone/Device, Date/Time (IST), and Email without asking the user.
+ * - Validates Marks <= Maximum Marks.
+ * - Computes Totals, Grades, and Class Positions (First, Second, Half-Yearly, Third, Final).
+ * ============================================================================
+ */
+
+const CONFIG = {
+  COLUMNS: {
+    SNO: 1,             // A
+    SESSION: 2,         // B
+    NIC_ID: 3,          // C
+    SR_NO: 4,           // D
+    ROLL_NO: 5,         // E
+    ADHAR_NO: 6,        // F
+    CLASS_NAME: 7,      // G
+    STUDENT_NAME: 8,    // H
+    FATHER_NAME: 9,     // I
+    MOTHER_NAME: 10,    // J
+    DOB: 11,            // K
+    GENDER: 12,         // L
+    CATEGORY: 13        // M
+  },
+
+  SUBJECT_TEMPLATES: [
+    {
+      id: 'hindi',
+      name: 'Hindi',
+      keywords: ['hindi', 'हिन्दी', 'हिंदी'],
+      type: 'standard',
+      defaultMax: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100, total: 200 }
+    },
+    {
+      id: 'english',
+      name: 'English',
+      keywords: ['english', 'अंग्रेजी'],
+      type: 'standard',
+      defaultMax: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100, total: 200 }
+    },
+    {
+      id: 'sanskrit',
+      name: 'Sanskart',
+      keywords: ['sanskart', 'sanskrit', 'संस्कृत'],
+      type: 'standard',
+      defaultMax: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100, total: 200 }
+    },
+    {
+      id: 'science',
+      name: 'Science',
+      keywords: ['science', 'विज्ञान'],
+      excludeKeywords: ['social'],
+      type: 'standard',
+      defaultMax: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100, total: 200 }
+    },
+    {
+      id: 'maths',
+      name: 'Mathematics',
+      keywords: ['math', 'maths', 'mathematics', 'गणित'],
+      type: 'standard',
+      defaultMax: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100, total: 200 }
+    },
+    {
+      id: 'socialScience',
+      name: 'Social Science',
+      keywords: ['social science', 'social', 'सामाजिक विज्ञान', 'sst'],
+      type: 'standard',
+      defaultMax: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100, total: 200 }
+    },
+    {
+      id: 'physicalEducation',
+      name: 'Physical and Health Education',
+      keywords: ['physical', 'health education', 'phe', 'शारीरिक शिक्षा', 'health'],
+      type: 'theory_practical',
+      defaultMax: {
+        firstTest: { theo: 10, prac: 8 },
+        secondTest: { theo: 10, prac: 7 },
+        halfYearly: { theo: 25, prac: 10 },
+        thirdTest: { theo: 15, prac: 10 },
+        annualExam: { theo: 70, prac: 30 },
+        total: 200
+      }
+    },
+    {
+      id: 'itConcept',
+      name: 'Concept of Information Technology',
+      keywords: ['information technology', 'concept of info', 'it concept', 'it', 'सूचना प्रौद्योगिकी', 'computer'],
+      type: 'theory_practical',
+      defaultMax: {
+        firstTest: { theo: 10, prac: 0 },
+        secondTest: { theo: 10, prac: 0 },
+        halfYearly: { theo: 50, prac: 20 },
+        thirdTest: { theo: 10, prac: 0 },
+        annualExam: { theo: 70, prac: 30 },
+        total: 200
+      }
+    },
+    {
+      id: 'supw',
+      name: 'Socially Useful Productive Work and Social Service',
+      keywords: ['supw', 'socially useful', 'स.उ.उ.का', 'productive work'],
+      type: 'standard',
+      defaultMax: { firstTest: 25, secondTest: 0, halfYearly: 45, thirdTest: 0, annualExam: 30, total: 100 }
+    },
+    {
+      id: 'artEducation',
+      name: 'Art Education',
+      keywords: ['art education', 'art', 'कला शिक्षा', 'drawing'],
+      type: 'standard',
+      defaultMax: { firstTest: 25, secondTest: 0, halfYearly: 60, thirdTest: 0, annualExam: 15, total: 100 }
+    }
+  ]
+};
+
+/**
+ * Handle GET requests
+ */
+function doGet(e) {
+  try {
+    const action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'getStudents';
+    const className = (e && e.parameter && e.parameter.className) ? e.parameter.className : '9th';
+
+    if (action === 'getClasses') {
+      const classes = getAvailableClasses();
+      return createJsonResponse({ status: 'success', data: classes });
+    }
+
+    if (action === 'getStudents') {
+      const result = getStudentsData(className);
+      return createJsonResponse({ status: 'success', data: result });
+    }
+
+    if (action === 'ping') {
+      return createJsonResponse({ status: 'success', message: 'AVM Marksheet API Online' });
+    }
+
+    return createJsonResponse({ status: 'error', message: 'Unknown action: ' + action });
+  } catch (err) {
+    return createJsonResponse({ status: 'error', message: err.toString() });
+  }
+}
+
+/**
+ * Handle POST requests
+ */
+function doPost(e) {
+  try {
+    let payload;
+    if (e && e.postData && e.postData.contents) {
+      payload = JSON.parse(e.postData.contents);
+    } else if (e && e.parameter) {
+      payload = e.parameter;
+    } else {
+      payload = {};
+    }
+
+    const action = payload.action || 'saveMarks';
+    const className = payload.className || '9th';
+
+    if (action === 'saveMarks') {
+      const result = saveStudentMarks(className, payload.studentId, payload.examKey, payload.marks, payload.audit);
+      return createJsonResponse(result);
+    }
+
+    if (action === 'recalculateRanks') {
+      const sheet = getSheetByClass(className);
+      const layout = resolveSheetLayout(sheet);
+      recalculateAllClassPositions(sheet, layout);
+      return createJsonResponse({ status: 'success', message: 'Class positions recalculated successfully' });
+    }
+
+    return createJsonResponse({ status: 'error', message: 'Unknown action: ' + action });
+  } catch (err) {
+    return createJsonResponse({ status: 'error', message: err.toString() });
+  }
+}
+
+/**
+ * Get all available class tabs in the workbook and check student count
+ */
+function getAvailableClasses() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ss.getSheets();
+  const classesList = [];
+
+  for (let c = 1; c <= 10; c++) {
+    const classNum = c;
+    const tabVariants = [
+      c + 'th', c + 'st', c + 'nd', c + 'rd',
+      String(c),
+      'Class ' + c,
+      'class ' + c
+    ];
+
+    let foundSheet = null;
+    for (let i = 0; i < sheets.length; i++) {
+      const sName = sheets[i].getName().trim().toLowerCase();
+      // Skip system sheets
+      if (sName === 'information sheet' || sName === 'audit log') continue;
+
+      for (let v = 0; v < tabVariants.length; v++) {
+        if (sName === tabVariants[v].toLowerCase()) {
+          foundSheet = sheets[i];
+          break;
+        }
+      }
+      if (foundSheet) break;
+    }
+
+    let studentCount = 0;
+    let sheetName = c + (c === 1 ? 'st' : c === 2 ? 'nd' : c === 3 ? 'rd' : 'th');
+
+    if (foundSheet) {
+      sheetName = foundSheet.getName();
+      const lastRow = foundSheet.getLastRow();
+      const startRow = getDataStartRow(foundSheet);
+      if (lastRow >= startRow) {
+        const names = foundSheet.getRange(startRow, CONFIG.COLUMNS.STUDENT_NAME, lastRow - startRow + 1, 1).getValues();
+        for (let k = 0; k < names.length; k++) {
+          const val = (names[k][0] || '').toString().trim();
+          if (val && !val.toLowerCase().includes('student') && !val.toLowerCase().includes('name')) {
+            studentCount++;
+          }
+        }
+      }
+    }
+
+    classesList.push({
+      classNum: classNum,
+      tabName: sheetName,
+      hasSheet: !!foundSheet,
+      studentCount: studentCount,
+      isReady: studentCount > 0
+    });
+  }
+
+  return classesList;
+}
+
+/**
+ * Helper: Find start row of data (Row 3 for Hardik Gehlot or Row 4)
+ */
+function getDataStartRow(sheet) {
+  const row3Val = (sheet.getRange(3, CONFIG.COLUMNS.STUDENT_NAME).getValue() || '').toString().trim();
+  if (row3Val && !row3Val.toLowerCase().includes('name') && !row3Val.toLowerCase().includes('student')) {
+    return 3;
+  }
+  return 4;
+}
+
+/**
+ * Find sheet by class name
+ */
+function getSheetByClass(className) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(className);
+  if (!sheet) {
+    const normalized = className.toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+    const sheets = ss.getSheets();
+    for (let i = 0; i < sheets.length; i++) {
+      const sName = sheets[i].getName().toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (sName === normalized || sName === normalized + 'th' || sName === 'class' + normalized) {
+        sheet = sheets[i];
+        break;
+      }
+    }
+  }
+  if (!sheet) {
+    throw new Error('Sheet tab for "' + className + '" not found in Google Sheet.');
+  }
+  return sheet;
+}
+
+/**
+ * DYNAMIC HEADER DETECTION
+ * Dynamically detects exact start column for every subject from Row 1 and Row 2.
+ * Prevents any subject column collision (e.g. Sanskart vs Art, Science vs Social Science).
+ */
+function resolveSheetLayout(sheet) {
+  const lastCol = Math.max(sheet.getLastColumn(), 200);
+  const row1Values = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  const row2Values = sheet.getRange(2, 1, 1, lastCol).getValues()[0];
+
+  function findCol(keywords, excludeKeywords) {
+    for (let c = 13; c < row1Values.length; c++) {
+      const v1 = (row1Values[c] || '').toString().trim().toLowerCase();
+      const v2 = (row2Values[c] || '').toString().trim().toLowerCase();
+      const text = v1 + ' ' + v2;
+      if (!text.trim()) continue;
+
+      let match = false;
+      for (let k = 0; k < keywords.length; k++) {
+        if (text.includes(keywords[k])) {
+          match = true;
+          break;
+        }
+      }
+
+      if (match && excludeKeywords) {
+        for (let e = 0; e < excludeKeywords.length; e++) {
+          if (text.includes(excludeKeywords[e])) {
+            match = false;
+            break;
+          }
+        }
+      }
+
+      if (match) {
+        return c + 1; // 1-indexed column
+      }
+    }
+    return -1;
+  }
+
+  // 1. Detect dynamic column positions
+  const colHindi = findCol(['hindi', 'हिन्दी', 'हिंदी']);
+  const colEnglish = findCol(['english', 'अंग्रेजी']);
+  const colSanskrit = findCol(['sanskrit', 'sanskart', 'संस्कृत']);
+  const colScience = findCol(['science', 'विज्ञान'], ['social', 'सामाजिक']);
+  const colMaths = findCol(['math', 'maths', 'mathematics', 'गणित']);
+  const colSocial = findCol(['social science', 'social', 'सामाजिक', 'sst']);
+  const colPHE = findCol(['physical and health', 'physical', 'health education', 'phe', 'शारीरिक']);
+  const colIT = findCol(['concept of information', 'information technology', 'it concept', 'सूचना']);
+  const colSUPW = findCol(['socially useful', 'productive work', 'supw', 'स.उ.उ.का']);
+  const colArt = findCol(['art education', 'कला शिक्षा', 'drawing'], ['sanskart', 'sanskrit']);
+  const colPos = findCol(['class position', 'final position', 'position', 'स्थान']);
+
+  // 2. Safe Fallbacks: Original verified spreadsheet columns
+  const baseHindi = colHindi !== -1 ? colHindi : 14;
+  const baseEnglish = colEnglish !== -1 ? colEnglish : 27;
+  const baseSanskrit = colSanskrit !== -1 ? colSanskrit : 40;
+  const baseScience = colScience !== -1 ? colScience : 53;
+  const baseSocial = colSocial !== -1 ? colSocial : 66;
+  const basePHE = colPHE !== -1 ? colPHE : 79;
+  const baseIT = colIT !== -1 ? colIT : 102;
+  const baseSUPW = colSUPW !== -1 ? colSUPW : 125;
+  const baseArt = colArt !== -1 ? colArt : 138;
+  const basePos = colPos !== -1 ? colPos : 151;
+
+  // Maths placement: If found in headers, use exact column; otherwise safe offset at 156
+  const baseMaths = colMaths !== -1 ? colMaths : (basePos + 5);
+
+  const subjectConfigs = [
+    { id: 'hindi', name: 'Hindi', type: 'standard', startCol: baseHindi, defaultMax: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100, total: 200 } },
+    { id: 'english', name: 'English', type: 'standard', startCol: baseEnglish, defaultMax: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100, total: 200 } },
+    { id: 'sanskrit', name: 'Sanskart', type: 'standard', startCol: baseSanskrit, defaultMax: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100, total: 200 } },
+    { id: 'science', name: 'Science', type: 'standard', startCol: baseScience, defaultMax: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100, total: 200 } },
+    { id: 'maths', name: 'Mathematics', type: 'standard', startCol: baseMaths, defaultMax: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100, total: 200 } },
+    { id: 'socialScience', name: 'Social Science', type: 'standard', startCol: baseSocial, defaultMax: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100, total: 200 } },
+    {
+      id: 'physicalEducation',
+      name: 'Physical and Health Education',
+      type: 'theory_practical',
+      startCol: basePHE,
+      defaultMax: { firstTest: { theo: 10, prac: 8 }, secondTest: { theo: 10, prac: 7 }, halfYearly: { theo: 25, prac: 10 }, thirdTest: { theo: 15, prac: 10 }, annualExam: { theo: 70, prac: 30 }, total: 200 }
+    },
+    {
+      id: 'itConcept',
+      name: 'Concept of Information Technology',
+      type: 'theory_practical',
+      startCol: baseIT,
+      defaultMax: { firstTest: { theo: 10, prac: 0 }, secondTest: { theo: 10, prac: 0 }, halfYearly: { theo: 50, prac: 20 }, thirdTest: { theo: 10, prac: 0 }, annualExam: { theo: 70, prac: 30 }, total: 200 }
+    },
+    { id: 'supw', name: 'Socially Useful Productive Work and Social Service', type: 'standard', startCol: baseSUPW, defaultMax: { firstTest: 25, secondTest: 0, halfYearly: 45, thirdTest: 0, annualExam: 30, total: 100 } },
+    { id: 'artEducation', name: 'Art Education', type: 'standard', startCol: baseArt, defaultMax: { firstTest: 25, secondTest: 0, halfYearly: 60, thirdTest: 0, annualExam: 15, total: 100 } }
+  ];
+
+  const subjects = [];
+  subjectConfigs.forEach(function(s) {
+    const isStd = (s.type === 'standard');
+    const startCol = s.startCol;
+
+    const subjDef = {
+      id: s.id,
+      name: s.name,
+      type: s.type,
+      startCol: startCol,
+      defaultMax: s.defaultMax,
+      cols: {}
+    };
+
+    if (isStd) {
+      subjDef.cols = {
+        firstTest:  { max: startCol,     obt: startCol + 1 },
+        secondTest: { max: startCol + 2, obt: startCol + 3 },
+        halfYearly: { max: startCol + 4, obt: startCol + 5 },
+        thirdTest:  { max: startCol + 6, obt: startCol + 7 },
+        annualExam: { max: startCol + 8, obt: startCol + 9 },
+        totalMarks: { max: startCol + 10, obt: startCol + 11 },
+        grade: startCol + 12
+      };
+    } else {
+      subjDef.cols = {
+        firstTest:  { theoMax: startCol,      theoObt: startCol + 1,  pracMax: startCol + 2,  pracObt: startCol + 3 },
+        secondTest: { theoMax: startCol + 4,  theoObt: startCol + 5,  pracMax: startCol + 6,  pracObt: startCol + 7 },
+        halfYearly: { theoMax: startCol + 8,  theoObt: startCol + 9,  pracMax: startCol + 10, pracObt: startCol + 11 },
+        thirdTest:  { theoMax: startCol + 12, theoObt: startCol + 13, pracMax: startCol + 14, pracObt: startCol + 15 },
+        annualExam: { theoMax: startCol + 16, theoObt: startCol + 17, pracMax: startCol + 18, pracObt: startCol + 19 },
+        totalMarks: { max: startCol + 20, obt: startCol + 21 },
+        grade: startCol + 22
+      };
+    }
+    subjects.push(subjDef);
+  });
+
+  const positions = {
+    firstTest: basePos,
+    secondTest: basePos + 1,
+    halfYearly: basePos + 2,
+    thirdTest: basePos + 3,
+    final: basePos + 4
+  };
+
+  // 4. Locate or define End-of-Sheet Audit Columns
+  let auditCol = -1;
+  for (let c = basePos + 5; c < row1Values.length; c++) {
+    const val1 = (row1Values[c] || '').toString().toLowerCase();
+    if (val1.includes('audit') || val1.includes('last modified')) {
+      auditCol = c + 1;
+      break;
+    }
+  }
+  if (auditCol === -1) {
+    auditCol = Math.max(basePos + 6, baseMaths + 14);
+  }
+
+  const auditColumns = {
+    startCol: auditCol,
+    lastModified: auditCol,
+    modifiedBy: auditCol + 1,
+    device: auditCol + 2,
+    macAddress: auditCol + 3,
+    deviceId: auditCol + 4,
+    ipLocation: auditCol + 5,
+    specs: auditCol + 6,
+    changesSummary: auditCol + 7
+  };
+
+  return {
+    subjects: subjects,
+    positions: positions,
+    auditColumns: auditColumns,
+    maxCol: Math.max(lastCol, auditCol + 8)
+  };
+}
+
+/**
+ * Fetch all students from sheet with all subject marks (including Maths)
+ */
+function getStudentsData(className) {
+  const sheet = getSheetByClass(className);
+  const layout = resolveSheetLayout(sheet);
+  const startRow = getDataStartRow(sheet);
+  const lastRow = sheet.getLastRow();
+  const lastCol = layout.maxCol;
+
+  if (lastRow < startRow) {
+    return { students: [], count: 0, className: className };
+  }
+
+  const numRows = lastRow - startRow + 1;
+  const values = sheet.getRange(startRow, 1, numRows, lastCol).getValues();
+  const students = [];
+
+  for (let r = 0; r < values.length; r++) {
+    const row = values[r];
+    const rowNumber = startRow + r;
+
+    const studentName = (row[CONFIG.COLUMNS.STUDENT_NAME - 1] || '').toString().trim();
+    if (!studentName || studentName.toLowerCase().includes('student')) continue;
+
+    const student = {
+      rowNumber: rowNumber,
+      sno: row[CONFIG.COLUMNS.SNO - 1] || (students.length + 1),
+      session: (row[CONFIG.COLUMNS.SESSION - 1] || '').toString(),
+      nicId: (row[CONFIG.COLUMNS.NIC_ID - 1] || '').toString(),
+      srNo: (row[CONFIG.COLUMNS.SR_NO - 1] || '').toString().trim(),
+      rollNo: formatCleanId(row[CONFIG.COLUMNS.ROLL_NO - 1]),
+      adharNo: formatCleanId(row[CONFIG.COLUMNS.ADHAR_NO - 1]),
+      className: (row[CONFIG.COLUMNS.CLASS_NAME - 1] || className).toString(),
+      studentName: studentName,
+      fatherName: (row[CONFIG.COLUMNS.FATHER_NAME - 1] || '').toString(),
+      motherName: (row[CONFIG.COLUMNS.MOTHER_NAME - 1] || '').toString(),
+      dob: formatDate(row[CONFIG.COLUMNS.DOB - 1]),
+      gender: (row[CONFIG.COLUMNS.GENDER - 1] || '').toString(),
+      category: (row[CONFIG.COLUMNS.CATEGORY - 1] || '').toString(),
+
+      positions: {
+        firstPeriodic: row[layout.positions.firstTest - 1] !== '' ? row[layout.positions.firstTest - 1] : '',
+        secondPeriodic: row[layout.positions.secondTest - 1] !== '' ? row[layout.positions.secondTest - 1] : '',
+        halfYearly: row[layout.positions.halfYearly - 1] !== '' ? row[layout.positions.halfYearly - 1] : '',
+        thirdPeriodic: row[layout.positions.thirdTest - 1] !== '' ? row[layout.positions.thirdTest - 1] : '',
+        finalPosition: row[layout.positions.final - 1] !== '' ? row[layout.positions.final - 1] : ''
+      },
+
+      subjects: {}
+    };
+
+    layout.subjects.forEach(function(subj) {
+      student.subjects[subj.id] = {
+        name: subj.name,
+        type: subj.type,
+        firstTest:  extractExamMarks(row, subj, 'firstTest'),
+        secondTest: extractExamMarks(row, subj, 'secondTest'),
+        halfYearly: extractExamMarks(row, subj, 'halfYearly'),
+        thirdTest:  extractExamMarks(row, subj, 'thirdTest'),
+        annualExam: extractExamMarks(row, subj, 'annualExam'),
+        totalMarks: {
+          max: getSafeNumericMax(row[subj.cols.totalMarks.max - 1], subj.defaultMax ? subj.defaultMax.total : 200),
+          obt: row[subj.cols.totalMarks.obt - 1] !== '' ? row[subj.cols.totalMarks.obt - 1] : ''
+        },
+        grade: (row[subj.cols.grade - 1] || '').toString()
+      };
+    });
+
+    students.push(student);
+  }
+
+  return {
+    className: className,
+    count: students.length,
+    students: students
+  };
+}
+
+function extractExamMarks(row, subj, examKey) {
+  const colDef = subj.cols[examKey];
+  if (!colDef) return {};
+
+  if (subj.type === 'standard') {
+    const defaultVal = subj.defaultMax ? subj.defaultMax[examKey] : 10;
+    return {
+      max: getSafeNumericMax(row[colDef.max - 1], defaultVal),
+      obt: row[colDef.obt - 1] !== '' ? row[colDef.obt - 1] : ''
+    };
+  } else {
+    const defaultTheo = (subj.defaultMax && subj.defaultMax[examKey]) ? subj.defaultMax[examKey].theo : 10;
+    const defaultPrac = (subj.defaultMax && subj.defaultMax[examKey]) ? subj.defaultMax[examKey].prac : 0;
+    return {
+      theoMax: getSafeNumericMax(row[colDef.theoMax - 1], defaultTheo),
+      theoObt: row[colDef.theoObt - 1] !== '' ? row[colDef.theoObt - 1] : '',
+      pracMax: getSafeNumericMax(row[colDef.pracMax - 1], defaultPrac),
+      pracObt: row[colDef.pracObt - 1] !== '' ? row[colDef.pracObt - 1] : ''
+    };
+  }
+}
+
+function getSafeNumericMax(cellVal, fallbackVal) {
+  if (typeof cellVal === 'number' && !isNaN(cellVal) && cellVal >= 0) return cellVal;
+  const p = Number(cellVal);
+  if (!isNaN(p) && p >= 0 && cellVal !== '') return p;
+  return fallbackVal;
+}
+
+/**
+ * SAVE STUDENT MARKS
+ * With Cell Comment Audit, End-of-Sheet Row Audit, and 'Information Sheet' tab logging.
+ * Direct pick - no user input required.
+ */
+function saveStudentMarks(className, studentId, examKey, marksMap, clientAudit) {
+  const sheet = getSheetByClass(className);
+  const layout = resolveSheetLayout(sheet);
+  const startRow = getDataStartRow(sheet);
+  const lastRow = sheet.getLastRow();
+  const lastCol = layout.maxCol;
+
+  if (lastRow < startRow) {
+    return { status: 'error', message: 'No students found in sheet' };
+  }
+
+  const numRows = lastRow - startRow + 1;
+  const values = sheet.getRange(startRow, 1, numRows, lastCol).getValues();
+
+  let targetRowIdx = -1;
+  for (let i = 0; i < values.length; i++) {
+    const rNum = startRow + i;
+    const nicId = (values[i][CONFIG.COLUMNS.NIC_ID - 1] || '').toString();
+    const srNo = (values[i][CONFIG.COLUMNS.SR_NO - 1] || '').toString();
+
+    if (studentId == rNum || studentId == nicId || studentId == srNo) {
+      targetRowIdx = i;
+      break;
+    }
+  }
+
+  if (targetRowIdx === -1) {
+    return { status: 'error', message: 'Student not found in sheet: ' + studentId };
+  }
+
+  const studentRow = values[targetRowIdx];
+  const actualSheetRow = startRow + targetRowIdx;
+  const studentName = (studentRow[CONFIG.COLUMNS.STUDENT_NAME - 1] || '').toString();
+  const studentSrNo = (studentRow[CONFIG.COLUMNS.SR_NO - 1] || '').toString();
+
+  // 1. Prepare Telemetry / Audit Details (Direct Pick - No User Input)
+  const audit = clientAudit || {};
+  const deviceInfo = audit.device || 'Mobile Browser';
+  const phoneModel = audit.phoneModel || deviceInfo;
+  const macAddress = audit.macAddress || 'N/A';
+  const deviceId = audit.deviceId || 'N/A';
+  const ipAddress = audit.ip || 'Direct WebApp Session';
+  const ispName = audit.isp || '';
+  const locationInfo = audit.location || 'India';
+  const hardwareSpecs = audit.specs || 'Standard Screen';
+  const batteryStatus = audit.battery || 'Normal';
+  const securityToken = audit.fingerprint || 'FP-TOKEN';
+  const timestampIST = audit.timestamp || Utilities.formatDate(new Date(), 'Asia/Kolkata', 'dd-MMM-yyyy hh:mm:ss a');
+  
+  // Resolve editor email: active user session, effective user, or client-provided identity
+  let editorEmail = '';
+  try {
+    editorEmail = Session.getActiveUser().getEmail();
+  } catch (e) {}
+  if (!editorEmail) {
+    try {
+      editorEmail = Session.getEffectiveUser().getEmail();
+    } catch (e) {}
+  }
+  if (!editorEmail && audit.email) {
+    editorEmail = audit.email;
+  }
+  if (!editorEmail) {
+    editorEmail = 'Teacher (Mobile Web App)';
+  }
+
+  const modifiedChanges = [];
+
+  // 2. Process each subject's marks
+  layout.subjects.forEach(function(subj) {
+    const input = marksMap[subj.id];
+    if (!input) return;
+    const colDef = subj.cols[examKey];
+    if (!colDef) return;
+
+    if (subj.type === 'standard') {
+      const defaultMax = subj.defaultMax ? subj.defaultMax[examKey] : 100;
+      const maxMarks = getSafeNumericMax(studentRow[colDef.max - 1], defaultMax);
+      let rawVal = input.obt;
+
+      if (rawVal !== undefined && rawVal !== null && String(rawVal).trim() !== '') {
+        let obtMarks = Number(rawVal);
+        if (!isNaN(obtMarks)) {
+          if (obtMarks > maxMarks) obtMarks = maxMarks;
+          if (obtMarks < 0) obtMarks = 0;
+
+          const prevVal = studentRow[colDef.obt - 1];
+
+          // ALWAYS WRITE VALUE DIRECTLY TO GOOGLE SHEET
+          sheet.getRange(actualSheetRow, colDef.obt).setValue(obtMarks);
+          studentRow[colDef.obt - 1] = obtMarks;
+
+          // Add cell comment / note with FULL forensic audit trail
+          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.obt), timestampIST, (prevVal !== '' && prevVal !== null) ? prevVal : '-', obtMarks, audit, examKey, subj.name, editorEmail);
+
+          modifiedChanges.push({
+            subject: subj.name,
+            prevMarks: (prevVal !== '' && prevVal !== null) ? prevVal : '-',
+            newMarks: obtMarks
+          });
+        }
+      } else {
+        const prevVal = studentRow[colDef.obt - 1];
+        if (prevVal !== '' && prevVal !== null) {
+          sheet.getRange(actualSheetRow, colDef.obt).setValue('');
+          studentRow[colDef.obt - 1] = '';
+          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.obt), timestampIST, prevVal, 'Cleared', audit, examKey, subj.name, editorEmail);
+          modifiedChanges.push({
+            subject: subj.name,
+            prevMarks: prevVal,
+            newMarks: 'Cleared'
+          });
+        }
+      }
+    } else {
+      // Dual Theory + Practical
+      const defaultTheo = (subj.defaultMax && subj.defaultMax[examKey]) ? subj.defaultMax[examKey].theo : 0;
+      const defaultPrac = (subj.defaultMax && subj.defaultMax[examKey]) ? subj.defaultMax[examKey].prac : 0;
+      const theoMax = getSafeNumericMax(studentRow[colDef.theoMax - 1], defaultTheo);
+      const pracMax = getSafeNumericMax(studentRow[colDef.pracMax - 1], defaultPrac);
+
+      let rawTheo = input.theoObt;
+      let rawPrac = input.pracObt;
+
+      // Update Theory
+      if (rawTheo !== undefined && rawTheo !== null && String(rawTheo).trim() !== '') {
+        let theoObt = Number(rawTheo);
+        if (!isNaN(theoObt)) {
+          if (theoObt > theoMax) theoObt = theoMax;
+          if (theoObt < 0) theoObt = 0;
+
+          const prevTheo = studentRow[colDef.theoObt - 1];
+
+          // ALWAYS WRITE DIRECTLY TO GOOGLE SHEET
+          sheet.getRange(actualSheetRow, colDef.theoObt).setValue(theoObt);
+          studentRow[colDef.theoObt - 1] = theoObt;
+
+          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.theoObt), timestampIST, (prevTheo !== '' && prevTheo !== null) ? prevTheo : '-', theoObt, audit, examKey + ' (Theory)', subj.name, editorEmail);
+          modifiedChanges.push({
+            subject: subj.name + ' (Theory)',
+            prevMarks: (prevTheo !== '' && prevTheo !== null) ? prevTheo : '-',
+            newMarks: theoObt
+          });
+        }
+      } else {
+        const prevTheo = studentRow[colDef.theoObt - 1];
+        if (prevTheo !== '' && prevTheo !== null) {
+          sheet.getRange(actualSheetRow, colDef.theoObt).setValue('');
+          studentRow[colDef.theoObt - 1] = '';
+          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.theoObt), timestampIST, prevTheo, 'Cleared', audit, examKey + ' (Theory)', subj.name, editorEmail);
+        }
+      }
+
+      // Update Practical
+      if (rawPrac !== undefined && rawPrac !== null && String(rawPrac).trim() !== '') {
+        let pracObt = Number(rawPrac);
+        if (!isNaN(pracObt)) {
+          if (pracObt > pracMax) pracObt = pracMax;
+          if (pracObt < 0) pracObt = 0;
+
+          const prevPrac = studentRow[colDef.pracObt - 1];
+
+          // ALWAYS WRITE DIRECTLY TO GOOGLE SHEET
+          sheet.getRange(actualSheetRow, colDef.pracObt).setValue(pracObt);
+          studentRow[colDef.pracObt - 1] = pracObt;
+
+          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.pracObt), timestampIST, (prevPrac !== '' && prevPrac !== null) ? prevPrac : '-', pracObt, audit, examKey + ' (Practical)', subj.name, editorEmail);
+          modifiedChanges.push({
+            subject: subj.name + ' (Practical)',
+            prevMarks: (prevPrac !== '' && prevPrac !== null) ? prevPrac : '-',
+            newMarks: pracObt
+          });
+        }
+      } else {
+        const prevPrac = studentRow[colDef.pracObt - 1];
+        if (prevPrac !== '' && prevPrac !== null) {
+          sheet.getRange(actualSheetRow, colDef.pracObt).setValue('');
+          studentRow[colDef.pracObt - 1] = '';
+          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.pracObt), timestampIST, prevPrac, 'Cleared', audit, examKey + ' (Practical)', subj.name, editorEmail);
+        }
+      }
+    }
+  });
+
+  // 3. Update Totals & Grades for all subjects
+  updateStudentTotalsAndGrades(sheet, actualSheetRow, studentRow, layout);
+
+  // 4. Recalculate Class Positions across the entire class
+  recalculateAllClassPositions(sheet, layout);
+
+  // 5. Update End-of-Sheet Row Audit Columns (8 Columns)
+  const changesSummary = modifiedChanges.length > 0 
+    ? modifiedChanges.map(function(m) { return m.subject + ': ' + m.newMarks; }).join('; ')
+    : 'Marks Verified/Saved';
+
+  ensureAuditHeadersExist(sheet, layout);
+  sheet.getRange(actualSheetRow, layout.auditColumns.startCol, 1, 8).setValues([
+    [
+      timestampIST,
+      editorEmail,
+      phoneModel,
+      macAddress,
+      deviceId,
+      ipAddress + (ispName ? ' (' + ispName + ')' : '') + ' [' + locationInfo + ']',
+      hardwareSpecs + ' | ' + batteryStatus,
+      changesSummary
+    ]
+  ]);
+
+  // 6. Log to 'Information Sheet' tab (Full 16 Forensic Columns)
+  if (modifiedChanges.length > 0) {
+    logToInformationSheet(SpreadsheetApp.getActiveSpreadsheet(), {
+      timestamp: timestampIST,
+      className: className,
+      srNo: studentSrNo,
+      studentName: studentName,
+      examKey: examKey,
+      device: phoneModel,
+      macAddress: macAddress,
+      deviceId: deviceId,
+      ip: ipAddress + (ispName ? ' (' + ispName + ')' : ''),
+      location: locationInfo,
+      fingerprint: securityToken,
+      specs: hardwareSpecs + ' | ' + batteryStatus,
+      email: editorEmail,
+      changes: modifiedChanges
+    });
+  }
+
+  SpreadsheetApp.flush();
+
+  return {
+    status: 'success',
+    message: 'Marks saved! Full forensic audit (MAC, IP, Device ID, Cell Comments) logged.',
+    rowNumber: actualSheetRow,
+    changesCount: modifiedChanges.length,
+    macAddress: macAddress,
+    deviceId: deviceId,
+    ip: ipAddress
+  };
+}
+
+/**
+ * Add / Append Complete Forensic Cell Note (Comment) to Sheet
+ */
+function addCellAuditNote(cell, timestamp, prevVal, newVal, audit, examName, subjName, email) {
+  try {
+    const existingNote = cell.getNote() || '';
+    const noteLines = [
+      '[' + timestamp + ']',
+      'Subject: ' + subjName + ' (' + examName + ')',
+      'Marks Change: ' + prevVal + ' ➔ ' + newVal,
+      '----------------------------------------',
+      'Editor Email: ' + email,
+      'Device/Phone: ' + (audit.phoneModel || audit.device || 'Mobile Device'),
+      'MAC Address: ' + (audit.macAddress || 'N/A'),
+      'Device UUID: ' + (audit.deviceId || 'N/A'),
+      'IP Address: ' + (audit.ip || 'Direct WebApp') + (audit.isp ? ' (' + audit.isp + ')' : ''),
+      'Location: ' + (audit.location || 'India'),
+      'Security Token: ' + (audit.fingerprint || 'N/A'),
+      'Hardware Specs: ' + (audit.specs || 'Standard Screen'),
+      'Battery Status: ' + (audit.battery || 'Normal')
+    ];
+
+    const newNote = noteLines.join('\n');
+    const fullNote = existingNote ? (existingNote + '\n========================================\n' + newNote) : newNote;
+    cell.setNote(fullNote);
+  } catch (err) {
+    Logger.log('Note setting error: ' + err);
+  }
+}
+
+/**
+ * Ensure 8 Audit Columns Header exists at the end of the class sheet
+ */
+function ensureAuditHeadersExist(sheet, layout) {
+  try {
+    const headerCell = sheet.getRange(1, layout.auditColumns.startCol).getValue();
+    if (!headerCell || !headerCell.toString().toLowerCase().includes('audit')) {
+      const headers = [
+        'Audit: Last Modified (IST)',
+        'Audit: Editor Email',
+        'Audit: Phone / Device Model',
+        'Audit: MAC Address',
+        'Audit: Device UUID',
+        'Audit: IP & Location',
+        'Audit: Hardware Specs',
+        'Audit: Changes Summary'
+      ];
+      sheet.getRange(1, layout.auditColumns.startCol, 1, headers.length).setValues([headers])
+        .setBackground('#1e3a8a')
+        .setFontColor('#ffffff')
+        .setFontWeight('bold');
+    }
+  } catch (e) {}
+}
+
+/**
+ * Append complete audit entries to dedicated 'Information Sheet' tab (16 Forensic Columns)
+ */
+function logToInformationSheet(ss, data) {
+  try {
+    let infoSheet = ss.getSheetByName('Information Sheet');
+    if (!infoSheet) {
+      infoSheet = ss.insertSheet('Information Sheet');
+      const headers = [
+        'Timestamp (IST)',
+        'Class',
+        'Student SR No.',
+        'Student Name',
+        'Exam Name',
+        'Subject',
+        'Previous Marks',
+        'New Marks Entered',
+        'Device / Phone Model',
+        'MAC Address',
+        'Device UUID',
+        'IP Address & ISP',
+        'Location (City/State)',
+        'Security Fingerprint',
+        'Hardware Specs & Battery',
+        'Editor Email ID'
+      ];
+      infoSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      infoSheet.getRange(1, 1, 1, headers.length)
+        .setBackground('#1e3a8a')
+        .setFontColor('#ffffff')
+        .setFontWeight('bold')
+        .setHorizontalAlignment('center');
+      infoSheet.setFrozenRows(1);
+    }
+
+    const examLabels = {
+      firstTest: '1st Periodic Test',
+      secondTest: '2nd Periodic Test',
+      halfYearly: 'Half-Yearly Examination',
+      thirdTest: '3rd Periodic Test',
+      annualExam: 'Annual Examination'
+    };
+    const examDisplayName = examLabels[data.examKey] || data.examKey;
+
+    const rowsToAppend = [];
+    data.changes.forEach(function(c) {
+      rowsToAppend.push([
+        data.timestamp,
+        data.className,
+        data.srNo,
+        data.studentName,
+        examDisplayName,
+        c.subject,
+        c.prevMarks,
+        c.newMarks,
+        data.device,
+        data.macAddress,
+        data.deviceId,
+        data.ip,
+        data.location,
+        data.fingerprint,
+        data.specs,
+        data.email
+      ]);
+    });
+
+    if (rowsToAppend.length > 0) {
+      const nextRow = infoSheet.getLastRow() + 1;
+      infoSheet.getRange(nextRow, 1, rowsToAppend.length, 16).setValues(rowsToAppend);
+    }
+  } catch (err) {
+    Logger.log('Information Sheet write error: ' + err);
+  }
+}
+
+/**
+ * Update totals and grades for each subject
+ */
+function updateStudentTotalsAndGrades(sheet, actualSheetRow, rowValues, layout) {
+  layout.subjects.forEach(function(subj) {
+    let totalObt = 0;
+    let hasAnyMarks = false;
+    const exams = ['firstTest', 'secondTest', 'halfYearly', 'thirdTest', 'annualExam'];
+
+    exams.forEach(function(exKey) {
+      const colDef = subj.cols[exKey];
+      if (subj.type === 'standard') {
+        const val = rowValues[colDef.obt - 1];
+        if (val !== '' && val !== null && !isNaN(val)) {
+          totalObt += Number(val);
+          hasAnyMarks = true;
+        }
+      } else {
+        const tVal = rowValues[colDef.theoObt - 1];
+        const pVal = rowValues[colDef.pracObt - 1];
+        if (tVal !== '' && tVal !== null && !isNaN(tVal)) {
+          totalObt += Number(tVal);
+          hasAnyMarks = true;
+        }
+        if (pVal !== '' && pVal !== null && !isNaN(pVal)) {
+          totalObt += Number(pVal);
+          hasAnyMarks = true;
+        }
+      }
+    });
+
+    if (hasAnyMarks) {
+      sheet.getRange(actualSheetRow, subj.cols.totalMarks.obt).setValue(totalObt);
+      rowValues[subj.cols.totalMarks.obt - 1] = totalObt;
+
+      const totalMax = getSafeNumericMax(rowValues[subj.cols.totalMarks.max - 1], (subj.defaultMax ? subj.defaultMax.total : 200));
+      const percentage = (totalObt / totalMax) * 100;
+      const grade = computeGrade(percentage);
+
+      sheet.getRange(actualSheetRow, subj.cols.grade).setValue(grade);
+      rowValues[subj.cols.grade - 1] = grade;
+    } else {
+      sheet.getRange(actualSheetRow, subj.cols.totalMarks.obt).setValue('');
+      sheet.getRange(actualSheetRow, subj.cols.grade).setValue('');
+    }
+  });
+}
+
+function computeGrade(percentage) {
+  if (percentage >= 91) return 'A+';
+  if (percentage >= 75) return 'A';
+  if (percentage >= 60) return 'B';
+  if (percentage >= 45) return 'C';
+  if (percentage >= 33) return 'D';
+  return 'E';
+}
+
+/**
+ * Recalculate Class Positions (Columns EU to EY or dynamically located)
+ */
+function recalculateAllClassPositions(sheet, layout) {
+  if (!layout) layout = resolveSheetLayout(sheet);
+  const startRow = getDataStartRow(sheet);
+  const lastRow = sheet.getLastRow();
+  const lastCol = layout.maxCol;
+
+  if (lastRow < startRow) return;
+
+  const numRows = lastRow - startRow + 1;
+  const values = sheet.getRange(startRow, 1, numRows, lastCol).getValues();
+
+  const firstTestScores = [];
+  const secondTestScores = [];
+  const halfYearlyScores = [];
+  const thirdTestScores = [];
+  const finalScores = [];
+
+  for (let r = 0; r < values.length; r++) {
+    const row = values[r];
+    const studentName = (row[CONFIG.COLUMNS.STUDENT_NAME - 1] || '').toString().trim();
+    if (!studentName || studentName.toLowerCase().includes('student')) continue;
+
+    let firstTotal = 0, hasFirst = false;
+    let secondTotal = 0, hasSecond = false;
+    let halfTotal = 0, hasHalf = false;
+    let thirdTotal = 0, hasThird = false;
+    let overallTotal = 0, hasAny = false;
+
+    layout.subjects.forEach(function(subj) {
+      const f1 = getExamScoreFromRow(row, subj, 'firstTest');
+      if (f1.hasScore) { firstTotal += f1.score; hasFirst = true; }
+
+      const f2 = getExamScoreFromRow(row, subj, 'secondTest');
+      if (f2.hasScore) { secondTotal += f2.score; hasSecond = true; }
+
+      const fh = getExamScoreFromRow(row, subj, 'halfYearly');
+      if (fh.hasScore) { halfTotal += fh.score; hasHalf = true; }
+
+      const f3 = getExamScoreFromRow(row, subj, 'thirdTest');
+      if (f3.hasScore) { thirdTotal += f3.score; hasThird = true; }
+
+      const totVal = row[subj.cols.totalMarks.obt - 1];
+      if (totVal !== '' && totVal !== null && !isNaN(totVal)) {
+        overallTotal += Number(totVal);
+        hasAny = true;
+      }
+    });
+
+    firstTestScores.push({ index: r, score: firstTotal, hasMarks: hasFirst });
+    secondTestScores.push({ index: r, score: secondTotal, hasMarks: hasSecond });
+    halfYearlyScores.push({ index: r, score: halfTotal, hasMarks: hasHalf });
+    thirdTestScores.push({ index: r, score: thirdTotal, hasMarks: hasThird });
+    finalScores.push({ index: r, score: overallTotal, hasMarks: hasAny });
+  }
+
+  const firstRanks = assignRanks(firstTestScores);
+  const secondRanks = assignRanks(secondTestScores);
+  const halfRanks = assignRanks(halfYearlyScores);
+  const thirdRanks = assignRanks(thirdTestScores);
+  const finalRanks = assignRanks(finalScores);
+
+  const rankUpdates = [];
+  for (let r = 0; r < values.length; r++) {
+    rankUpdates.push([
+      firstRanks[r] !== undefined ? firstRanks[r] : '',
+      secondRanks[r] !== undefined ? secondRanks[r] : '',
+      halfRanks[r] !== undefined ? halfRanks[r] : '',
+      thirdRanks[r] !== undefined ? thirdRanks[r] : '',
+      finalRanks[r] !== undefined ? finalRanks[r] : ''
+    ]);
+  }
+
+  sheet.getRange(startRow, layout.positions.firstTest, rankUpdates.length, 5).setValues(rankUpdates);
+}
+
+function assignRanks(scoreList) {
+  const active = scoreList.filter(function(item) { return item.hasMarks; });
+  active.sort(function(a, b) { return b.score - a.score; });
+
+  const ranksMap = {};
+  let currentRank = 1;
+  for (let i = 0; i < active.length; i++) {
+    if (i > 0 && active[i].score < active[i - 1].score) {
+      currentRank = i + 1;
+    }
+    ranksMap[active[i].index] = currentRank;
+  }
+
+  const result = {};
+  scoreList.forEach(function(item) {
+    result[item.index] = ranksMap[item.index] !== undefined ? ranksMap[item.index] : '';
+  });
+  return result;
+}
+
+function getExamScoreFromRow(row, subj, examKey) {
+  const colDef = subj.cols[examKey];
+  let sum = 0;
+  let hasScore = false;
+
+  if (subj.type === 'standard') {
+    const val = row[colDef.obt - 1];
+    if (val !== '' && val !== null && !isNaN(val)) {
+      sum += Number(val);
+      hasScore = true;
+    }
+  } else {
+    const tVal = row[colDef.theoObt - 1];
+    const pVal = row[colDef.pracObt - 1];
+    if (tVal !== '' && tVal !== null && !isNaN(tVal)) {
+      sum += Number(tVal);
+      hasScore = true;
+    }
+    if (pVal !== '' && pVal !== null && !isNaN(pVal)) {
+      sum += Number(pVal);
+      hasScore = true;
+    }
+  }
+  return { score: sum, hasScore: hasScore };
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  if (d instanceof Date) {
+    const day = ('0' + d.getDate()).slice(-2);
+    const month = ('0' + (d.getMonth() + 1)).slice(-2);
+    const year = d.getFullYear();
+    return day + '/' + month + '/' + year;
+  }
+  return d.toString();
+}
+
+function formatCleanId(val) {
+  if (val === null || val === undefined) return '';
+  let str = val.toString().trim();
+  if (typeof val === 'number') {
+    str = val.toLocaleString('fullwide', { useGrouping: false });
+  }
+  return str;
+}
+
+function createJsonResponse(data) {
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}

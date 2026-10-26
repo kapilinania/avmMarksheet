@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>AVM School - Student Marksheet & Evaluation Portal</title>
+  <meta name="theme-color" content="#1e3a8a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- MOBILE NATIVE APP BAR (Sticky Top) -->
+  <header class="mobile-app-bar">
+    <div class="app-bar-inner">
+      <div class="brand-row">
+        <div class="brand-badge-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+            <path d="M6 6h10M6 10h10M6 14h6"/>
+          </svg>
+        </div>
+        <div class="brand-meta">
+          <div class="brand-title-wrap">
+            <h1 class="brand-name">AVM Marksheet Portal</h1>
+            <span class="session-chip">2026-27</span>
+          </div>
+          <span class="brand-school">Adarsh Vidya Mandir (आदर्श विद्या मंदिर)</span>
+        </div>
+      </div>
+
+      <div class="app-bar-actions">
+        <!-- Live Connection Status Pill -->
+        <div id="connectionStatus" class="live-status-pill disconnected" title="Google Sheet Status">
+          <span class="live-dot-pulse"></span>
+          <span class="status-lbl">Connecting...</span>
+        </div>
+
+        <!-- Sync Button -->
+        <button class="top-touch-btn" id="refreshBtn" title="Sync with Google Sheet" aria-label="Refresh">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+          </svg>
+        </button>
+
+        <!-- Settings Button -->
+        <button class="top-touch-btn" id="settingsBtn" title="Settings" aria-label="Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="app-viewport">
+
+    <!-- DISCONNECTED STATE SCREEN (Shown when Apps Script is not connected) -->
+    <section class="mobile-state-card" id="disconnectedScreen" style="display: none;">
+      <div class="state-icon-circle danger">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <line x1="1" y1="1" x2="23" y2="23"/>
+          <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+          <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+          <path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>
+          <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+          <line x1="12" y1="20" x2="12.01" y2="20"/>
+        </svg>
+      </div>
+      <h2>Google Sheet Not Connected</h2>
+      <p class="state-sub">
+        To view and enter student marks, connect your Google Apps Script Web App URL for spreadsheet <strong>AvmStudentData</strong>.
+      </p>
+      <button class="touch-btn primary btn-full-touch" id="connectSheetBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+        <span>Connect Google Sheet Now</span>
+      </button>
+    </section>
+
+    <!-- LOADING SCREEN -->
+    <section class="mobile-state-card" id="loadingScreen">
+      <div class="mobile-loader-spinner"></div>
+      <h3>Fetching Live Google Sheet Data...</h3>
+      <p class="state-sub">Loading classes, roster, marks, and positions directly from your spreadsheet.</p>
+    </section>
+
+    <!-- LIVE DATA VIEW (Visible only when connected) -->
+    <div id="liveContentContainer" style="display: none;">
+
+      <!-- 1. HORIZONTAL CLASS SELECTOR CAROUSEL -->
+      <section class="carousel-block">
+        <div class="block-label-bar">
+          <span class="block-title">Select Class (कक्षा चुनें)</span>
+          <span class="block-sub" id="classCountSubtitle">Auto-syncing classes</span>
+        </div>
+        <div class="horizontal-scroll-track" id="classPillsContainer">
+          <!-- Dynamically generated from sheet tabs -->
+        </div>
+      </section>
+
+      <!-- 2. HORIZONTAL EXAM SELECTOR CAROUSEL -->
+      <section class="carousel-block">
+        <div class="block-label-bar">
+          <span class="block-title">Select Exam (परीक्षा चुनें)</span>
+          <span class="active-exam-pill" id="currentExamBadge">1st Periodic Test</span>
+        </div>
+        <div class="horizontal-scroll-track exam-track" id="examTabsContainer">
+          <button class="exam-touch-chip active" data-exam="firstTest">
+            <span class="chip-icon">📝</span>
+            <span class="chip-title">1st Test</span>
+          </button>
+          <button class="exam-touch-chip" data-exam="secondTest">
+            <span class="chip-icon">📄</span>
+            <span class="chip-title">2nd Test</span>
+          </button>
+          <button class="exam-touch-chip" data-exam="halfYearly">
+            <span class="chip-icon">📚</span>
+            <span class="chip-title">Half-Yearly</span>
+          </button>
+          <button class="exam-touch-chip" data-exam="thirdTest">
+            <span class="chip-icon">📋</span>
+            <span class="chip-title">3rd Test</span>
+          </button>
+          <button class="exam-touch-chip" data-exam="annualExam">
+            <span class="chip-icon">🎓</span>
+            <span class="chip-title">Annual Exam</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 3. MOBILE SUMMARY STATS CARDS -->
+      <section class="mobile-stats-row">
+        <div class="mini-stat-card">
+          <span class="mini-stat-val" id="totalStudentsCount">0</span>
+          <span class="mini-stat-lbl">Students</span>
+        </div>
+        <div class="mini-stat-card">
+          <span class="mini-stat-val text-success" id="marksEnteredCount">0</span>
+          <span class="mini-stat-lbl">Entered</span>
+        </div>
+        <div class="mini-stat-card">
+          <span class="mini-stat-val text-warning" id="marksPendingCount">0</span>
+          <span class="mini-stat-lbl">Pending</span>
+        </div>
+        <div class="mini-stat-card topper-card">
+          <span class="mini-stat-val text-gold topper-trunc" id="classTopperName">—</span>
+          <span class="mini-stat-lbl">Topper 🏆</span>
+        </div>
+      </section>
+
+      <!-- 4. SEARCH & FILTER SECTION -->
+      <section class="search-filter-card">
+        <div class="search-touch-box">
+          <svg class="search-touch-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="search" id="searchInput" placeholder="Search by name, SR No, or NIC ID..." autocomplete="off">
+          <button class="search-clear-btn" id="searchClearBtn" style="display:none;" aria-label="Clear">&times;</button>
+        </div>
+
+        <div class="filter-touch-row">
+          <select id="genderFilter" class="touch-select">
+            <option value="all">All Genders</option>
+            <option value="Male">Male (छात्र)</option>
+            <option value="Female">Female (छात्रा)</option>
+          </select>
+
+          <select id="categoryFilter" class="touch-select">
+            <option value="all">All Categories</option>
+            <option value="OBC">OBC</option>
+            <option value="SC">SC</option>
+            <option value="ST">ST</option>
+            <option value="GENERAL">GENERAL</option>
+          </select>
+
+          <!-- View Switcher (Cards vs Table) -->
+          <div class="touch-segmented-ctrl">
+            <button class="seg-btn active" id="viewCardsBtn" title="Mobile Cards View">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <rect x="3" y="3" width="7" height="7"/>
+                <rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/>
+              </svg>
+            </button>
+            <button class="seg-btn" id="viewTableBtn" title="Table View">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="roster-meta-row">
+          <span class="meta-count" id="rosterCountBadge">0 Students Loaded</span>
+          <span class="meta-sheet-sync">
+            <span class="green-live-dot"></span> Live From Google Sheet
+          </span>
+        </div>
+      </section>
+
+      <!-- 5. STUDENT CARDS LIST (Mobile First) -->
+      <section class="students-cards-container" id="studentCardsContainer">
+        <!-- Rendered via JS -->
+      </section>
+
+      <!-- 6. STUDENT TABLE VIEW (Desktop / Optional) -->
+      <section class="students-table-container" id="studentTableContainer" style="display: none;">
+        <div class="table-scroll-wrap">
+          <table class="native-table">
+            <thead>
+              <tr>
+                <th style="width: 45px;">#</th>
+                <th>Student Details</th>
+                <th>SR / NIC</th>
+                <th>Roll No</th>
+                <th>Aadhar No</th>
+                <th>Gender & Cat</th>
+                <th id="examHeaderName">1st Test Marks</th>
+                <th>Total Marks</th>
+                <th>Position</th>
+                <th style="text-align: center; width: 110px;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Empty Filter State -->
+      <div class="mobile-empty-box" id="emptyState" style="display: none;">
+        <div class="empty-icon-lg">🔍</div>
+        <h3>No Matching Students Found</h3>
+        <p>Try clearing your search query or reset the gender / category filter.</p>
+      </div>
+
+      <!-- Class Sheet Empty State -->
+      <div class="mobile-empty-box" id="classEmptyNotice" style="display: none;">
+        <div class="empty-icon-lg">📋</div>
+        <h3 id="classEmptyTitle">Class 1 — Sheet Empty</h3>
+        <p id="classEmptyDesc">
+          No students are currently enrolled in this class sheet in Google Sheets. Add student rows to the spreadsheet and they will automatically appear here!
+        </p>
+        <button class="touch-btn secondary" id="returnToClass9Btn">Switch to Class 9th</button>
+      </div>
+
+    </div> <!-- /liveContentContainer -->
+
+  </main>
+
+  <!-- =====================================================================
+       FULL-SCREEN MOBILE MARKS ENTRY SHEET / MODAL
+       ===================================================================== -->
+  <div class="fullscreen-modal-sheet" id="marksModal" style="display: none;">
+    <div class="sheet-scaffold">
+      
+      <!-- Top Fixed Navigation Bar -->
+      <div class="sheet-top-nav">
+        <button class="sheet-back-touch-btn" id="modalCloseBtn" aria-label="Back">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          <span>Back</span>
+        </button>
+        <div class="sheet-header-title">
+          <span class="header-small-tag" id="modalExamBadge">1st Periodic Test</span>
+          <h2 id="modalStudentName" class="header-student-name">STUDENT NAME</h2>
+        </div>
+        <div class="sheet-header-rank" id="modalHeaderRankBadge">Rank #—</div>
+      </div>
+
+      <!-- Scrollable Body Content -->
+      <div class="sheet-scroll-body">
+        
+        <!-- Student Details Card (Accordion/Compact) -->
+        <div class="student-profile-strip">
+          <div class="strip-lock-banner">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span>Pre-filled demographic data from Google Sheet (Read-Only)</span>
+          </div>
+          <div class="profile-details-grid">
+            <div class="profile-detail-cell">
+              <span class="detail-label">SR No.</span>
+              <strong id="modalSrNo">—</strong>
+            </div>
+            <div class="profile-detail-cell">
+              <span class="detail-label">Student NIC</span>
+              <strong id="modalNicId">—</strong>
+            </div>
+            <div class="profile-detail-cell">
+              <span class="detail-label">Roll No.</span>
+              <strong id="modalRollNo">—</strong>
+            </div>
+            <div class="profile-detail-cell">
+              <span class="detail-label">Aadhar No.</span>
+              <strong id="modalAdharNo">—</strong>
+            </div>
+            <div class="profile-detail-cell">
+              <span class="detail-label">Father Name</span>
+              <strong id="modalFatherName">—</strong>
+            </div>
+            <div class="profile-detail-cell">
+              <span class="detail-label">Mother Name</span>
+              <strong id="modalMotherName">—</strong>
+            </div>
+            <div class="profile-detail-cell">
+              <span class="detail-label">Date of Birth</span>
+              <strong id="modalDob">—</strong>
+            </div>
+            <div class="profile-detail-cell">
+              <span class="detail-label">Category</span>
+              <strong id="modalCategory">—</strong>
+            </div>
+            <div class="profile-detail-cell">
+              <span class="detail-label">Gender</span>
+              <strong id="modalGender">—</strong>
+            </div>
+            <div class="profile-detail-cell">
+              <span class="detail-label">Class</span>
+              <strong id="modalClass">Class 9th</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sticky Live Evaluation Summary Strip -->
+        <div class="live-eval-summary-strip">
+          <div class="eval-stat-item">
+            <span class="eval-item-lbl">Total Score</span>
+            <span class="eval-item-val" id="summaryExamTotal">0 <small id="summaryExamMax">/ 118</small></span>
+          </div>
+          <div class="eval-stat-item">
+            <span class="eval-item-lbl">Percentage</span>
+            <span class="eval-item-val" id="summaryExamPercent">0.0%</span>
+          </div>
+          <div class="eval-stat-item">
+            <span class="eval-item-lbl">Grade</span>
+            <span class="grade-badge grade-e" id="summaryExamGrade">E</span>
+          </div>
+          <div class="eval-stat-item">
+            <span class="eval-item-lbl">Position</span>
+            <span class="eval-item-val rank-num" id="summaryProjectedRank">Rank #—</span>
+          </div>
+        </div>
+
+        <!-- Strict Error Banner -->
+        <div class="validation-error-strip" id="formErrorBanner" style="display: none;">
+          <span class="err-alert-icon">⚠️</span>
+          <span id="formErrorMessage">Marks cannot exceed Maximum Marks allowed!</span>
+        </div>
+
+        <!-- Dynamic Touch Subject Cards -->
+        <div class="subject-touch-cards-list" id="subjectsEntryContainer">
+          <!-- Dynamically populated subject input cards -->
+        </div>
+
+      </div>
+
+      <!-- Sticky Fixed Bottom Action Bar -->
+      <div class="sheet-fixed-bottom-bar">
+        <div class="bottom-nav-btns">
+          <button type="button" class="touch-nav-btn" id="prevStudentBtn" title="Previous Student">
+            &larr; Prev
+          </button>
+          <button type="button" class="touch-nav-btn" id="nextStudentBtn" title="Next Student">
+            Next &rarr;
+          </button>
+        </div>
+        <button type="button" class="touch-btn primary btn-save-sheet" id="saveMarksBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          <span id="saveBtnText">Save Marks to Google Sheet</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="fullscreen-modal-sheet modal-backdrop-center" id="settingsModal" style="display: none;">
+    <div class="dialog-box">
+      <div class="dialog-header">
+        <div class="dialog-title">
+          <span class="dialog-tag">Configuration</span>
+          <h2>Google Sheet Connection</h2>
+        </div>
+        <button class="sheet-back-touch-btn" id="settingsCloseBtn">&times;</button>
+      </div>
+
+      <div class="dialog-body">
+        <p class="dialog-desc">
+          Enter your Google Apps Script Web App URL to link this portal directly with your spreadsheet (<strong>AvmStudentData</strong>).
+        </p>
+
+        <div class="dialog-form-group">
+          <label for="scriptUrlInput"><strong>Web App URL:</strong></label>
+          <input type="url" id="scriptUrlInput" class="touch-text-input" placeholder="https://script.google.com/macros/s/.../exec">
+          <small class="dialog-helper">Make sure Web App deployment has "Who has access: Anyone".</small>
+        </div>
+
+        <div class="dialog-status-box" id="settingsTestStatus">
+          <span>Checking connection...</span>
+        </div>
+
+        <div class="dialog-actions-row">
+          <button type="button" class="touch-btn secondary" id="testConnectionBtn">Test Connection</button>
+          <button type="button" class="touch-btn primary" id="saveSettingsBtn">Save & Sync</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- FingerprintJS Device & Security Forensics Library -->
+  <script src="https://openfpcdn.io/fingerprintjs/v4"></script>
+  <script src="app.js"></script>
+</body>
+</html>
