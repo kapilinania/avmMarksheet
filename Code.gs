@@ -1521,6 +1521,7 @@ function sendTeacherOtp(inputName, inputEmail) {
     return {
       status: 'success',
       message: 'OTP sent successfully to your registered email address (' + maskEmail(cleanInputEmail) + ').',
+      email: cleanInputEmail,
       emailMasked: maskEmail(cleanInputEmail)
     };
   } catch (err) {
@@ -1540,49 +1541,91 @@ function verifyTeacherOtp(inputEmail, inputOtp) {
     const cleanEmail = rawEmail.replace(/@gmail\.om$/i, '@gmail.com');
     const cleanOtp = String(inputOtp || '').trim().replace(/\D/g, '');
 
-    if (!cleanEmail || !cleanOtp) {
+    if (!cleanOtp || cleanOtp.length !== 6) {
       return {
         status: 'error',
-        message: 'Unauthorized login. Please enter both Email ID and 6-digit OTP. Please connect with admin.'
+        message: 'Unauthorized login. Invalid OTP. Please connect with admin.'
       };
     }
 
-    const cacheKey = 'OTP_' + cleanEmail;
-    let storedJson = CacheService.getScriptCache().get(cacheKey);
+    let storedJson = null;
 
+    // 1. Direct Cache lookup with cleanEmail (if real email provided)
+    if (cleanEmail && !cleanEmail.includes('*')) {
+      storedJson = CacheService.getScriptCache().get('OTP_' + cleanEmail);
+      if (!storedJson) {
+        try {
+          storedJson = PropertiesService.getScriptProperties().getProperty('OTP_' + cleanEmail);
+        } catch (e) {}
+      }
+    }
+
+    // 2. Persistent Multi-Store Fallback: Search all active OTP records
+    // Handles masked emails (with ***), case differences, or transient cache drops
     if (!storedJson) {
       try {
-        storedJson = PropertiesService.getScriptProperties().getProperty(cacheKey);
+        const props = PropertiesService.getScriptProperties().getProperties();
+        for (let k in props) {
+          if (k.indexOf('OTP_') === 0) {
+            try {
+              const data = JSON.parse(props[k]);
+              const timeDiff = Date.now() - (data.timestamp || 0);
+              // Valid within 15 minutes (900,000 ms)
+              if (timeDiff < 900000) {
+                if (String(data.otp).trim() === cleanOtp) {
+                  // If OTP matches, accept it!
+                  storedJson = props[k];
+                  try {
+                    PropertiesService.getScriptProperties().deleteProperty(k);
+                  } catch (e) {}
+                  break;
+                }
+              } else {
+                // Expired OTP cleanup
+                PropertiesService.getScriptProperties().deleteProperty(k);
+              }
+            } catch (pErr) {}
+          }
+        }
       } catch (e) {}
     }
 
     if (!storedJson) {
       return {
         status: 'error',
-        message: 'Unauthorized login. OTP expired or not found. Please request a new OTP or connect with admin.'
+        message: 'Unauthorized login. Invalid OTP. Please connect with admin.'
       };
     }
 
     const storedData = JSON.parse(storedJson);
+
+    // Final sanity check
     if (String(storedData.otp).trim() !== cleanOtp) {
       return {
         status: 'error',
-        message: 'Unauthorized login. Invalid OTP entered. Please check your email or connect with admin.'
+        message: 'Unauthorized login. Invalid OTP. Please connect with admin.'
       };
     }
 
-    // OTP verified! Clean up
+    // Clean up cache & properties
     try {
-      CacheService.getScriptCache().remove(cacheKey);
-      PropertiesService.getScriptProperties().deleteProperty(cacheKey);
+      CacheService.getScriptCache().remove('OTP_' + storedData.email);
+      PropertiesService.getScriptProperties().deleteProperty('OTP_' + storedData.email);
     } catch (e) {}
 
-    // Locate complete profile
+    // Locate complete profile from staff sheet
     const staffList = getStaffMembers();
     let teacher = null;
+    const targetEmail = (storedData.email || cleanEmail).toLowerCase().trim().replace(/@gmail\.om$/i, '@gmail.com');
+
     for (let i = 0; i < staffList.length; i++) {
       let sEmail = String(staffList[i].email || '').toLowerCase().trim().replace(/@gmail\.om$/i, '@gmail.com');
-      if (sEmail === cleanEmail) {
+      let sId = String(staffList[i].teacherId || '').toLowerCase().trim();
+      let sName = String(staffList[i].employeeName || '').toLowerCase().trim();
+
+      if ((sEmail && sEmail === targetEmail) || 
+          (storedData.teacherId && sId === String(storedData.teacherId).toLowerCase().trim()) ||
+          (storedData.name && sName === String(storedData.name).toLowerCase().trim())) {
         teacher = staffList[i];
         break;
       }
@@ -1593,7 +1636,7 @@ function verifyTeacherOtp(inputEmail, inputOtp) {
         teacherId: storedData.teacherId || 'AVM26K01',
         employeeName: storedData.name,
         designation: storedData.designation || 'Teacher',
-        email: cleanEmail,
+        email: targetEmail,
         aadhaarNumber: ''
       };
     }
@@ -1613,7 +1656,7 @@ function verifyTeacherOtp(inputEmail, inputOtp) {
   } catch (err) {
     return {
       status: 'error',
-      message: 'Unauthorized login. Server verification error: ' + err.toString()
+      message: 'Unauthorized login. Invalid OTP. Please connect with admin.'
     };
   }
 }

@@ -192,8 +192,8 @@ function showTeacherLoginScreen(show = true) {
   }
 }
 
-function showOtpStep2(email) {
-  state.pendingOtpEmail = email;
+function showOtpStep2(realEmail, displayMaskedEmail) {
+  state.pendingOtpEmail = realEmail;
   const step1 = document.getElementById("teacherLoginFormStep1");
   const step2 = document.getElementById("teacherLoginFormStep2");
   const targetEmailEl = document.getElementById("otpTargetEmailDisplay");
@@ -201,7 +201,7 @@ function showOtpStep2(email) {
 
   if (step1) step1.style.display = "none";
   if (step2) step2.style.display = "flex";
-  if (targetEmailEl) targetEmailEl.textContent = email;
+  if (targetEmailEl) targetEmailEl.textContent = displayMaskedEmail || realEmail;
   if (subtitle) subtitle.textContent = "Check your email for the 6-digit OTP code sent from avmsoorsagar93@gmail.com.";
 
   const otpInput = document.getElementById("loginOtpInput");
@@ -1608,6 +1608,7 @@ async function handleSendTeacherOtp(e) {
   submitBtn.innerHTML = `<span>Sending OTP from avmsoorsagar93@gmail.com...</span>`;
 
   let otpSentSuccess = false;
+  let actualRealEmail = rawEmail;
   let targetDisplayEmail = rawEmail;
 
   // 1. Send OTP via Google Apps Script (MailApp from avmsoorsagar93@gmail.com)
@@ -1618,6 +1619,7 @@ async function handleSendTeacherOtp(e) {
       const json = await res.json();
       if (json.status === "success") {
         otpSentSuccess = true;
+        actualRealEmail = json.email || rawEmail;
         targetDisplayEmail = json.emailMasked || rawEmail;
       } else {
         submitBtn.disabled = false;
@@ -1645,6 +1647,8 @@ async function handleSendTeacherOtp(e) {
 
     if (matched) {
       otpSentSuccess = true;
+      actualRealEmail = matched.email;
+      targetDisplayEmail = matched.email;
       state.mockOtpCode = Math.floor(100000 + Math.random() * 900000).toString();
       state.mockStaffMatched = matched;
       showToast(`🔑 [Testing Mode] OTP sent to ${rawEmail}: ${state.mockOtpCode}`, "success");
@@ -1663,7 +1667,7 @@ async function handleSendTeacherOtp(e) {
 
   // Move to Step 2
   showToast("6-Digit OTP sent from avmsoorsagar93@gmail.com!", "success");
-  showOtpStep2(targetDisplayEmail);
+  showOtpStep2(actualRealEmail, targetDisplayEmail);
 }
 
 /**
