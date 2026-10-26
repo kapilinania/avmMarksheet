@@ -83,77 +83,231 @@
 
     <!-- PORTAL ROLE SELECTION SCREEN (Teacher vs Student Login) -->
     <section class="mobile-state-card portal-choice-card" id="portalChoiceScreen" style="display: none;">
-      <div class="choice-school-header">
-        <div class="school-seal-circle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-            <path d="M6 6h10M6 10h10M6 14h6"/>
-          </svg>
-        </div>
-        <h2 class="choice-title">AVM Marksheet Portal</h2>
-        <p class="choice-sub">Adarsh Vidya Mandir, Soorsagar • Please select your login role:</p>
-      </div>
-
-      <div class="role-cards-grid">
-        <!-- 1. TEACHER PORTAL (Active) -->
-        <div class="role-select-box active-role" id="chooseTeacherRoleBtn">
-          <div class="role-badge-row">
-            <span class="role-icon-box">👨‍🏫</span>
-            <span class="role-status-badge live-ready">Live &amp; Secure</span>
-          </div>
-          <h3 class="role-name">Teacher / Faculty Login</h3>
-          <p class="role-desc">Enter marks, student evaluations, check class ranks, and manage marksheet records with OTP authentication.</p>
-          <button type="button" class="touch-btn primary role-action-btn">
-            <span>Teacher Login</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
-              <polyline points="9 18 15 12 9 6"/>
+      
+      <!-- INSTITUTION HERO HEADER -->
+      <header class="choice-school-header">
+        <div class="school-seal-crest">
+          <div class="seal-inner-ring">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="seal-svg">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+              <path d="M6 6h10M6 10h10M6 14h6"/>
+              <circle cx="12" cy="18" r="1.5" fill="currentColor"/>
             </svg>
-          </button>
+          </div>
+          <span class="seal-ribbon">ESTD 1993</span>
         </div>
+
+        <div class="school-header-text">
+          <span class="school-affiliation-pill">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            RBSE AFFILIATED • SR. SEC. SCHOOL
+          </span>
+          <h2 class="choice-school-hi">आदर्श विद्या मंदिर उच्च माध्यमिक विद्यालय</h2>
+          <h3 class="choice-school-en">ADARSH VIDYA MANDIR SR. SEC. SCHOOL</h3>
+          <p class="choice-location">Soorsagar, Jodhpur (Rajasthan) • Academic Session 2026–27</p>
+          <div class="choice-divider-line"></div>
+          <p class="choice-sub-lead">Student Marksheet &amp; Evaluation Portal • Select your portal role below:</p>
+        </div>
+      </header>
+
+      <!-- ROLE SELECTION CARDS GRID -->
+      <div class="role-cards-grid">
+        
+        <!-- 1. TEACHER PORTAL (Active & Secure) -->
+        <article class="role-select-box active-role" id="chooseTeacherRoleBtn" tabindex="0" role="button" aria-label="Access Teacher Portal">
+          <div class="role-card-banner role-banner-teacher"></div>
+          <div class="role-card-body">
+            <div class="role-badge-row">
+              <div class="role-icon-squircle teacher-squircle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                  <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                </svg>
+              </div>
+              <span class="role-status-badge live-ready">
+                <span class="live-status-dot"></span>
+                <span>LIVE &amp; ACTIVE</span>
+              </span>
+            </div>
+
+            <div class="role-title-wrap">
+              <h3 class="role-name">Teacher / Faculty Portal</h3>
+              <span class="role-hindi-sub">शिक्षक एवं मूल्यांकन पोर्टल</span>
+            </div>
+
+            <p class="role-desc">Authorized faculty access for student marks entry, term evaluations, continuous grading, and automated class ranking.</p>
+
+            <ul class="role-feature-list">
+              <li>
+                <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Direct Student Marks Entry &amp; Updates</span>
+              </li>
+              <li>
+                <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Automated Percentage, Totals &amp; Class Ranks</span>
+              </li>
+              <li>
+                <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Audit Logged with Teacher ID &amp; Timestamp</span>
+              </li>
+              <li>
+                <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Secured 6-Digit Email OTP Login</span>
+              </li>
+            </ul>
+
+            <button type="button" class="touch-btn primary role-action-btn">
+              <span>Enter Teacher Portal</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
+        </article>
 
         <!-- 2. STUDENT PORTAL (Coming Soon) -->
-        <div class="role-select-box coming-soon-role" id="chooseStudentRoleBtn">
-          <div class="role-badge-row">
-            <span class="role-icon-box">🎓</span>
-            <span class="role-status-badge coming-soon-badge">Coming Soon</span>
+        <article class="role-select-box coming-soon-role" id="chooseStudentRoleBtn" tabindex="0" role="button" aria-label="Student Marksheet Portal (Coming Soon)">
+          <div class="role-card-banner role-banner-student"></div>
+          <div class="role-card-body">
+            <div class="role-badge-row">
+              <div class="role-icon-squircle student-squircle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+                  <path d="M9 10h6M9 14h4"/>
+                </svg>
+              </div>
+              <span class="role-status-badge coming-soon-badge">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>COMING SOON</span>
+              </span>
+            </div>
+
+            <div class="role-title-wrap">
+              <h3 class="role-name">Student Marksheet Portal</h3>
+              <span class="role-hindi-sub">विद्यार्थी परीक्षा परिणाम पोर्टल</span>
+            </div>
+
+            <p class="role-desc">Online scorecard viewer for students &amp; parents to check terminal grades, academic progress, and download marksheet cards.</p>
+
+            <ul class="role-feature-list feature-list-muted">
+              <li>
+                <svg class="feat-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Terminal &amp; Annual Digital Report Cards</span>
+              </li>
+              <li>
+                <svg class="feat-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Subject-Wise Marks &amp; Grade Breakdown</span>
+              </li>
+              <li>
+                <svg class="feat-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Printable PDF Marksheet Download</span>
+              </li>
+              <li>
+                <svg class="feat-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Direct Search with Roll No &amp; Aadhaar</span>
+              </li>
+            </ul>
+
+            <button type="button" class="touch-btn secondary role-action-btn disabled-btn">
+              <span>Coming Soon (शीघ्र उपलब्ध)</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </button>
           </div>
-          <h3 class="role-name">Student Marksheet Portal</h3>
-          <p class="role-desc">View student report cards, overall percentage, exam marks, and academic performance scorecards.</p>
-          <button type="button" class="touch-btn secondary role-action-btn disabled-btn">
-            <span>Coming Soon (शीघ्र उपलब्ध)</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
-            </svg>
-          </button>
-        </div>
+        </article>
+
       </div>
+
+      <!-- PORTAL FOOTER TRUST BAR -->
+      <footer class="choice-trust-footer">
+        <div class="trust-pill-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span>SSL 256-Bit Encrypted</span>
+        </div>
+        <span class="trust-sep">•</span>
+        <div class="trust-pill-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          <span>Real-Time Cloud Sync</span>
+        </div>
+        <span class="trust-sep">•</span>
+        <div class="trust-pill-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <span>avmsoorsagar93@gmail.com</span>
+        </div>
+      </footer>
+
     </section>
 
     <!-- TEACHER LOGIN SCREEN (2-Step Email & OTP Verification) -->
     <section class="mobile-state-card teacher-login-card" id="teacherLoginScreen" style="display: none;">
       
-      <!-- Back to Role Select -->
-      <button type="button" class="login-back-btn" id="loginBackToRoleBtn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
-          <polyline points="15 18 9 12 15 6"/>
-        </svg>
-        <span>Change Role</span>
-      </button>
+      <!-- Top Bar: Back to Role Select & Security Badge -->
+      <div class="login-card-top-nav">
+        <button type="button" class="login-back-btn" id="loginBackToRoleBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span>Back to Role Selection</span>
+        </button>
+        <span class="login-badge-mini">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          OTP SECURE
+        </span>
+      </div>
 
-      <div class="teacher-login-badge">
-        <div class="login-badge-icon">
+      <!-- Header with Crest -->
+      <div class="teacher-login-hero">
+        <div class="login-crest-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
             <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
             <path d="M6 12v5c3 3 9 3 12 0v-5"/>
           </svg>
         </div>
-        <span class="login-sub-tag">AVM FACULTY VERIFICATION</span>
-      </div>
-
-      <div class="teacher-login-header">
-        <h2 class="teacher-login-title">Teacher Portal Login</h2>
-        <p class="teacher-login-subtitle" id="loginStepSubtitle">Enter your name and registered email ID to receive a secure login OTP.</p>
+        <div class="teacher-login-header-text">
+          <span class="login-sub-tag">AVM FACULTY VERIFICATION</span>
+          <h2 class="teacher-login-title">Teacher Portal Login</h2>
+          <p class="teacher-login-subtitle" id="loginStepSubtitle">Enter your name and registered email ID to receive a secure login OTP.</p>
+        </div>
       </div>
 
       <!-- STEP 1: Enter Teacher Name & Email ID -->
