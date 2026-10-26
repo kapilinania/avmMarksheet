@@ -145,6 +145,20 @@ function doGet(e) {
       return createJsonResponse(result);
     }
 
+    if (action === 'sendTeacherOtp') {
+      const name = (e && e.parameter && e.parameter.name) ? e.parameter.name : '';
+      const email = (e && e.parameter && e.parameter.email) ? e.parameter.email : '';
+      const result = sendTeacherOtp(name, email);
+      return createJsonResponse(result);
+    }
+
+    if (action === 'verifyTeacherOtp') {
+      const email = (e && e.parameter && e.parameter.email) ? e.parameter.email : '';
+      const otp = (e && e.parameter && e.parameter.otp) ? e.parameter.otp : '';
+      const result = verifyTeacherOtp(email, otp);
+      return createJsonResponse(result);
+    }
+
     if (action === 'getStaffList') {
       const staff = getStaffMembers();
       return createJsonResponse({ status: 'success', data: staff });
@@ -186,6 +200,20 @@ function doPost(e) {
       const name = payload.name || payload.employeeName || '';
       const mobile = payload.mobile || payload.mobileNumber || '';
       const result = verifyTeacher(name, mobile);
+      return createJsonResponse(result);
+    }
+
+    if (action === 'sendTeacherOtp') {
+      const name = payload.name || payload.employeeName || '';
+      const email = payload.email || payload.emailId || '';
+      const result = sendTeacherOtp(name, email);
+      return createJsonResponse(result);
+    }
+
+    if (action === 'verifyTeacherOtp') {
+      const email = payload.email || payload.emailId || '';
+      const otp = payload.otp || '';
+      const result = verifyTeacherOtp(email, otp);
       return createJsonResponse(result);
     }
 
@@ -1208,10 +1236,11 @@ function getStaffSheet(ss) {
   if (!ss) ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheets = ss.getSheets();
 
-  // 1. Check common tab name variants
+  // 1. Check common tab name variants ('Teacher List' is primary)
   const candidates = [
+    'teacher list', 'teachers list', 'staff list',
     'staff', 'teacher', 'teachers', 'employee', 'employees',
-    'staff details', 'teacher details', 'staff data', 'staff list',
+    'staff details', 'teacher details', 'staff data',
     'faculty', 'faculty list', 'karmchari'
   ];
 
@@ -1233,7 +1262,7 @@ function getStaffSheet(ss) {
     if (s.getLastRow() >= 1 && s.getLastColumn() >= 5) {
       const firstRowVals = s.getRange(1, 1, 1, Math.min(s.getLastColumn(), 25)).getValues()[0];
       const joined = firstRowVals.map(function(v) { return String(v || '').toLowerCase(); }).join(' ');
-      if (joined.includes('employee name') || (joined.includes('designation') && joined.includes('mobile'))) {
+      if (joined.includes('employee name') || (joined.includes('designation') && (joined.includes('mobile') || joined.includes('email')))) {
         return s;
       }
     }
@@ -1254,13 +1283,14 @@ function resolveStaffLayout(sheet) {
     aadhaar: 2,
     name: 3,
     fatherName: 4,
-    husbandName: 5,
-    dob: 6,
-    gender: 7,
-    category: 8,
-    mobile: 12,
-    subject: 17,
-    teacherId: 0
+    email: 5,
+    teacherId: 6,
+    husbandName: 7,
+    dob: 8,
+    gender: 9,
+    category: 10,
+    mobile: 14,
+    subject: 19
   };
 
   headerVals.forEach(function(val, idx) {
@@ -1270,6 +1300,10 @@ function resolveStaffLayout(sheet) {
 
     if (h.includes('employee name') || (h.includes('name') && !h.includes('father') && !h.includes('husband'))) {
       cols.name = colNum;
+    } else if (h.includes('email')) {
+      cols.email = colNum;
+    } else if (h.includes('teacher id') || h.includes('teacher_id') || h.includes('empid') || h.includes('emp id') || h.includes('staff id')) {
+      cols.teacherId = colNum;
     } else if (h.includes('mobile') || h.includes('phone') || h.includes('contact')) {
       cols.mobile = colNum;
     } else if (h.includes('designation') || h.includes('post')) {
@@ -1280,8 +1314,6 @@ function resolveStaffLayout(sheet) {
       cols.fatherName = colNum;
     } else if (h.includes('husband')) {
       cols.husbandName = colNum;
-    } else if (h.includes('teacher id') || h.includes('teacher_id') || h.includes('empid') || h.includes('emp id') || h.includes('staff id')) {
-      cols.teacherId = colNum;
     } else if (h.includes('subject')) {
       cols.subject = colNum;
     }
@@ -1311,33 +1343,35 @@ function getStaffMembers() {
     const name = String(row[layout.name - 1] || '').trim();
     if (!name || name.toLowerCase().includes('employee name') || name.toLowerCase().includes('total')) continue;
 
-    let mobile = String(row[layout.mobile - 1] || '').trim();
+    let email = layout.email > 0 ? String(row[layout.email - 1] || '').trim() : '';
+    let mobile = layout.mobile > 0 ? String(row[layout.mobile - 1] || '').trim() : '';
     if (typeof row[layout.mobile - 1] === 'number') {
       mobile = row[layout.mobile - 1].toLocaleString('fullwide', { useGrouping: false });
     }
 
-    let aadhaar = String(row[layout.aadhaar - 1] || '').trim();
+    let aadhaar = layout.aadhaar > 0 ? String(row[layout.aadhaar - 1] || '').trim() : '';
     if (typeof row[layout.aadhaar - 1] === 'number') {
       aadhaar = row[layout.aadhaar - 1].toLocaleString('fullwide', { useGrouping: false });
     }
 
-    let designation = String(row[layout.designation - 1] || '').trim();
+    let designation = layout.designation > 0 ? String(row[layout.designation - 1] || '').trim() : 'Teacher';
     let subject = layout.subject > 0 ? String(row[layout.subject - 1] || '').trim() : '';
 
-    // If teacher ID column exists in sheet, read it
+    // If teacher ID column exists in sheet, read it (e.g. AVM26K01, AVM26K02...)
     let teacherId = '';
     if (layout.teacherId > 0) {
       teacherId = String(row[layout.teacherId - 1] || '').trim();
     }
-    // Auto-generate consistent teacher ID if not present in sheet: AVM-T01, AVM-T02...
+    // Auto-generate consistent teacher ID if not present: AVM26K01, AVM26K02...
     if (!teacherId) {
       const padNum = (i + 1) < 10 ? ('0' + (i + 1)) : String(i + 1);
-      teacherId = 'AVM-T' + padNum;
+      teacherId = 'AVM26K' + padNum;
     }
 
     staff.push({
       teacherId: teacherId,
       employeeName: name,
+      email: email,
       mobileNumber: mobile,
       designation: designation || 'Teacher',
       currentSubject: subject,
@@ -1350,7 +1384,209 @@ function getStaffMembers() {
 }
 
 /**
- * Verify Teacher Login with case-insensitive name and normalized 10-digit mobile number
+ * Send 6-Digit Random OTP to Teacher Email
+ * Sender account: avmsoorsagar93@gmail.com
+ */
+function sendTeacherOtp(inputName, inputEmail) {
+  try {
+    const rawName = String(inputName || '').trim();
+    const rawEmail = String(inputEmail || '').trim().toLowerCase();
+
+    if (!rawName || !rawEmail) {
+      return {
+        status: 'error',
+        message: 'Unauthorized login. Please enter both Teacher Name and Email ID. Please connect with admin.'
+      };
+    }
+
+    const normInputName = rawName.toLowerCase().replace(/\s+/g, ' ');
+    // Clean user or sheet typos (like .om instead of .com)
+    const cleanInputEmail = rawEmail.replace(/@gmail\.om$/i, '@gmail.com');
+
+    const staffList = getStaffMembers();
+    if (!staffList || staffList.length === 0) {
+      return {
+        status: 'error',
+        message: 'Unauthorized login. Staff records not found in Google Sheet. Please connect with admin.'
+      };
+    }
+
+    let matchedStaff = null;
+    for (let i = 0; i < staffList.length; i++) {
+      const s = staffList[i];
+      const sName = String(s.employeeName || '').toLowerCase().replace(/\s+/g, ' ');
+      let sEmail = String(s.email || '').toLowerCase().trim();
+      sEmail = sEmail.replace(/@gmail\.om$/i, '@gmail.com');
+
+      if (!sEmail) continue;
+
+      const nameMatch = (sName === normInputName || sName.includes(normInputName) || normInputName.includes(sName));
+      const emailMatch = (sEmail === cleanInputEmail);
+
+      if (nameMatch && emailMatch) {
+        matchedStaff = s;
+        break;
+      }
+    }
+
+    if (!matchedStaff) {
+      return {
+        status: 'error',
+        message: 'Unauthorized login. Teacher Name and Email ID do not match school records. Please connect with admin.'
+      };
+    }
+
+    // Generate random 6-digit numeric OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Cache OTP for 10 minutes (600 seconds)
+    const cache = CacheService.getScriptCache();
+    const cacheKey = 'OTP_' + cleanInputEmail;
+    const otpPayload = JSON.stringify({
+      otp: otp,
+      name: matchedStaff.employeeName,
+      teacherId: matchedStaff.teacherId,
+      designation: matchedStaff.designation,
+      email: cleanInputEmail,
+      timestamp: Date.now()
+    });
+    cache.put(cacheKey, otpPayload, 600);
+
+    // Also persist in PropertiesService as backup
+    try {
+      PropertiesService.getScriptProperties().setProperty(cacheKey, otpPayload);
+    } catch (e) {}
+
+    // Send Email from avmsoorsagar93@gmail.com
+    const schoolEmail = 'avmsoorsagar93@gmail.com';
+    const emailSubject = '🔐 AVM Marksheet Portal - Login OTP: ' + otp;
+    const htmlBody = 
+      '<div style="font-family: Arial, sans-serif; max-width: 540px; margin: 0 auto; padding: 24px; border: 1.5px solid #bfdbfe; border-radius: 12px; background: #ffffff;">' +
+        '<div style="text-align: center; margin-bottom: 20px;">' +
+          '<h2 style="color: #1e3a8a; margin: 0 0 4px; font-size: 22px;">Adarsh Vidya Mandir (AVM)</h2>' +
+          '<p style="color: #64748b; font-size: 13px; margin: 0;">Soorsagar, Jodhpur • School Marksheet & Evaluation Portal</p>' +
+        '</div>' +
+        '<hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;" />' +
+        '<p style="font-size: 15px; color: #334155; margin: 0 0 10px;">Dear <strong>' + matchedStaff.employeeName + '</strong> (' + matchedStaff.teacherId + '),</p>' +
+        '<p style="font-size: 14px; color: #475569; line-height: 1.5; margin: 0 0 16px;">You have requested to log in to the <strong>AVM Marksheet Portal</strong>. Use the 6-digit OTP below to authenticate your session:</p>' +
+        '<div style="background: #eff6ff; border: 2px dashed #3b82f6; border-radius: 10px; padding: 18px; text-align: center; margin: 20px 0;">' +
+          '<span style="font-size: 38px; font-weight: 900; letter-spacing: 8px; color: #1e3a8a;">' + otp + '</span>' +
+          '<p style="font-size: 12px; color: #64748b; margin: 8px 0 0;">⏱️ Valid for 10 minutes only. Do NOT share this OTP with anyone.</p>' +
+        '</div>' +
+        '<p style="font-size: 13px; color: #64748b; line-height: 1.4; margin: 0 0 16px;">If you did not request this login, please immediately contact the school administrator at <strong>' + schoolEmail + '</strong>.</p>' +
+        '<hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />' +
+        '<p style="font-size: 11px; color: #94a3b8; text-align: center; margin: 0;">Automated security notification sent from ' + schoolEmail + '</p>' +
+      '</div>';
+
+    MailApp.sendEmail({
+      to: cleanInputEmail,
+      subject: emailSubject,
+      htmlBody: htmlBody,
+      name: 'AVM School Portal (avmsoorsagar93@gmail.com)'
+    });
+
+    return {
+      status: 'success',
+      message: 'OTP sent successfully to your registered email address (' + maskEmail(cleanInputEmail) + ').',
+      emailMasked: maskEmail(cleanInputEmail)
+    };
+  } catch (err) {
+    return {
+      status: 'error',
+      message: 'Error sending OTP email: ' + err.toString() + '. Please connect with admin.'
+    };
+  }
+}
+
+/**
+ * Verify Teacher 6-Digit OTP
+ */
+function verifyTeacherOtp(inputEmail, inputOtp) {
+  try {
+    const rawEmail = String(inputEmail || '').trim().toLowerCase();
+    const cleanEmail = rawEmail.replace(/@gmail\.om$/i, '@gmail.com');
+    const cleanOtp = String(inputOtp || '').trim().replace(/\D/g, '');
+
+    if (!cleanEmail || !cleanOtp) {
+      return {
+        status: 'error',
+        message: 'Unauthorized login. Please enter both Email ID and 6-digit OTP. Please connect with admin.'
+      };
+    }
+
+    const cacheKey = 'OTP_' + cleanEmail;
+    let storedJson = CacheService.getScriptCache().get(cacheKey);
+
+    if (!storedJson) {
+      try {
+        storedJson = PropertiesService.getScriptProperties().getProperty(cacheKey);
+      } catch (e) {}
+    }
+
+    if (!storedJson) {
+      return {
+        status: 'error',
+        message: 'Unauthorized login. OTP expired or not found. Please request a new OTP or connect with admin.'
+      };
+    }
+
+    const storedData = JSON.parse(storedJson);
+    if (String(storedData.otp).trim() !== cleanOtp) {
+      return {
+        status: 'error',
+        message: 'Unauthorized login. Invalid OTP entered. Please check your email or connect with admin.'
+      };
+    }
+
+    // OTP verified! Clean up
+    try {
+      CacheService.getScriptCache().remove(cacheKey);
+      PropertiesService.getScriptProperties().deleteProperty(cacheKey);
+    } catch (e) {}
+
+    // Locate complete profile
+    const staffList = getStaffMembers();
+    let teacher = null;
+    for (let i = 0; i < staffList.length; i++) {
+      let sEmail = String(staffList[i].email || '').toLowerCase().trim().replace(/@gmail\.om$/i, '@gmail.com');
+      if (sEmail === cleanEmail) {
+        teacher = staffList[i];
+        break;
+      }
+    }
+
+    if (!teacher) {
+      teacher = {
+        teacherId: storedData.teacherId || 'AVM26K01',
+        employeeName: storedData.name,
+        designation: storedData.designation || 'Teacher',
+        email: cleanEmail,
+        aadhaarNumber: ''
+      };
+    }
+
+    return {
+      status: 'success',
+      teacher: {
+        id: teacher.teacherId,
+        name: teacher.employeeName,
+        designation: teacher.designation,
+        email: teacher.email,
+        mobile: teacher.mobileNumber,
+        subject: teacher.currentSubject,
+        aadhaarMasked: maskAadhaar(teacher.aadhaarNumber)
+      }
+    };
+  } catch (err) {
+    return {
+      status: 'error',
+      message: 'Unauthorized login. Server verification error: ' + err.toString()
+    };
+  }
+}
+
+/**
+ * Verify Teacher (Mobile fallback)
  */
 function verifyTeacher(inputName, inputMobile) {
   try {
@@ -1360,32 +1596,22 @@ function verifyTeacher(inputName, inputMobile) {
     if (!rawName || !rawMobile) {
       return {
         status: 'error',
-        message: 'Please enter both Teacher Name and Mobile Number.'
+        message: 'Unauthorized login. Please enter both Name and Mobile Number. Please connect with admin.'
       };
     }
 
-    // Clean inputs: lowercase, collapse multiple whitespace
     const normInputName = rawName.toLowerCase().replace(/\s+/g, ' ');
-    // Clean mobile: extract 10 digits
     const normInputMobile = rawMobile.replace(/\D/g, '').slice(-10);
-
-    if (normInputMobile.length < 10) {
-      return {
-        status: 'error',
-        message: 'Please enter a valid 10-digit Mobile Number.'
-      };
-    }
 
     const staffList = getStaffMembers();
     if (!staffList || staffList.length === 0) {
       return {
         status: 'error',
-        message: 'Staff sheet not found or empty in this Google Spreadsheet.'
+        message: 'Unauthorized login. Staff records not found. Please connect with admin.'
       };
     }
 
     let matchedStaff = null;
-
     for (let i = 0; i < staffList.length; i++) {
       const s = staffList[i];
       const sMobile = String(s.mobileNumber || '').replace(/\D/g, '').slice(-10);
@@ -1393,7 +1619,6 @@ function verifyTeacher(inputName, inputMobile) {
 
       if (sMobile !== normInputMobile) continue;
 
-      // Mobile matches! Now verify Name (case-insensitive & whitespace tolerant)
       if (sName === normInputName || sName.includes(normInputName) || normInputName.includes(sName)) {
         matchedStaff = s;
         break;
@@ -1403,7 +1628,7 @@ function verifyTeacher(inputName, inputMobile) {
     if (!matchedStaff) {
       return {
         status: 'error',
-        message: 'Teacher details not found. Please verify your Name and 10-digit Mobile Number.'
+        message: 'Unauthorized login. Details do not match school records. Please connect with admin.'
       };
     }
 
@@ -1413,6 +1638,7 @@ function verifyTeacher(inputName, inputMobile) {
         id: matchedStaff.teacherId,
         name: matchedStaff.employeeName,
         designation: matchedStaff.designation,
+        email: matchedStaff.email,
         mobile: matchedStaff.mobileNumber,
         subject: matchedStaff.currentSubject,
         aadhaarMasked: maskAadhaar(matchedStaff.aadhaarNumber)
@@ -1421,9 +1647,18 @@ function verifyTeacher(inputName, inputMobile) {
   } catch (err) {
     return {
       status: 'error',
-      message: 'Server error during verification: ' + err.toString()
+      message: 'Unauthorized login: ' + err.toString()
     };
   }
+}
+
+function maskEmail(email) {
+  if (!email || !email.includes('@')) return 'email';
+  const parts = email.split('@');
+  const user = parts[0];
+  const domain = parts[1];
+  if (user.length <= 2) return user[0] + '***@' + domain;
+  return user.slice(0, 2) + '***' + user.slice(-1) + '@' + domain;
 }
 
 function maskAadhaar(val) {

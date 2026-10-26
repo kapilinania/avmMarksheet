@@ -365,6 +365,247 @@ body {
 }
 
 /* ==========================================================================
+   ROLE SELECTION SCREEN (Teacher vs Student Login)
+   ========================================================================== */
+.portal-choice-card {
+  max-width: 600px;
+  width: 100%;
+  margin: 16px auto;
+  padding: 24px 18px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.choice-school-header {
+  margin-bottom: 22px;
+}
+
+.school-seal-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+}
+
+.school-seal-circle svg {
+  width: 28px;
+  height: 28px;
+}
+
+.choice-title {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0 0 6px;
+}
+
+.choice-sub {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.role-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 640px) {
+  .role-cards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.role-select-box {
+  padding: 18px;
+  border-radius: var(--radius-md);
+  border: 2px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  transition: all 0.2s ease;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.role-select-box.active-role {
+  border-color: #3b82f6;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12);
+  cursor: pointer;
+}
+
+.role-select-box.active-role:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: 0 6px 16px rgba(30, 58, 138, 0.18);
+}
+
+.role-select-box.coming-soon-role {
+  opacity: 0.85;
+  background: #f8fafc;
+  border-style: dashed;
+}
+
+.role-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.role-icon-box {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.role-status-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+.role-status-badge.live-ready {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.role-status-badge.coming-soon-badge {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.role-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px;
+}
+
+.role-desc {
+  font-size: 0.76rem;
+  color: #64748b;
+  line-height: 1.45;
+  margin: 0 0 16px;
+  flex-grow: 1;
+}
+
+.role-action-btn {
+  width: 100%;
+}
+
+.role-action-btn.disabled-btn {
+  background: #f1f5f9;
+  color: #64748b;
+  border-color: #cbd5e1;
+  cursor: pointer;
+}
+
+/* Back button to role selection */
+.login-back-btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 12px;
+}
+
+.login-back-btn:hover {
+  color: var(--primary);
+}
+
+/* OTP Step 2 Styling */
+.otp-sent-notice-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+
+.notice-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.notice-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.75rem;
+  color: #1e40af;
+  line-height: 1.35;
+}
+
+.target-email-lbl {
+  font-size: 0.85rem;
+  color: #1e3a8a;
+  word-break: break-all;
+}
+
+.otp-large-field {
+  font-size: 1.4rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 12px !important;
+  text-align: center !important;
+  padding-left: 12px !important;
+  height: 52px !important;
+  color: #1e3a8a !important;
+}
+
+.otp-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.text-link-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 6px;
+  text-decoration: underline;
+}
+
+.text-link-btn:hover {
+  color: var(--primary-hover);
+}
+
+.dot-divider {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+/* ==========================================================================
    TEACHER LOGIN SCREEN / CARD
    ========================================================================== */
 .teacher-login-card {

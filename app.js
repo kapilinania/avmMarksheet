@@ -32,21 +32,22 @@ const EVALUATION_SUBJECTS = [
 
 // Fallback staff directory matching school records (used offline or when live sheet endpoint is syncing)
 const FALLBACK_STAFF_LIST = [
-  { id: "AVM-T01", name: "Ten Singh", designation: "Headmaster", mobile: "7737681970", aadhaar: "445104551553", subject: "Administration" },
-  { id: "AVM-T02", name: "Kapil Inania", designation: "Computer Teacher", mobile: "9828522814", aadhaar: "284148579207", subject: "Computer / IT" },
-  { id: "AVM-T03", name: "Radha Kishan Upadhyay", designation: "Teacher", mobile: "9413257085", aadhaar: "622232154638", subject: "General" },
-  { id: "AVM-T04", name: "Pooja Parihar", designation: "Mathematics Teacher", mobile: "7014322413", aadhaar: "794903185318", subject: "Mathematics" },
-  { id: "AVM-T05", name: "Arjun Lal Nagariya", designation: "Teacher", mobile: "9004237691", aadhaar: "470046144821", subject: "General" },
-  { id: "AVM-T06", name: "Bhavana Pareek", designation: "Teacher", mobile: "8003771825", aadhaar: "400277485222", subject: "General" },
-  { id: "AVM-T07", name: "Annapurna Pareek", designation: "Teacher", mobile: "9001204531", aadhaar: "389416332692", subject: "Hindi / Sanskrit" },
-  { id: "AVM-T08", name: "Jyoti Pareek", designation: "Teacher", mobile: "8949033224", aadhaar: "482708361987", subject: "Commerce / General" },
-  { id: "AVM-T09", name: "Mahesh Kumar", designation: "Teacher", mobile: "9521852209", aadhaar: "671077109901", subject: "General" },
-  { id: "AVM-T10", name: "Indra Prajapat", designation: "Teacher", mobile: "7976189889", aadhaar: "353819340484", subject: "General" },
-  { id: "AVM-T11", name: "Priyanka Parihar", designation: "Teacher", mobile: "9001625383", aadhaar: "263003666793", subject: "General" },
-  { id: "AVM-T12", name: "Anita", designation: "Teacher", mobile: "7976288053", aadhaar: "674245388061", subject: "General" },
-  { id: "AVM-T13", name: "Reena Sharma", designation: "Secondary Teacher", mobile: "7976198976", aadhaar: "272661410969", subject: "Secondary" },
-  { id: "AVM-T14", name: "Jaishree Dave", designation: "Teacher", mobile: "9413087191", aadhaar: "434366729226", subject: "General" },
-  { id: "AVM-T15", name: "Vikash", designation: "Teacher", mobile: "9166928204", aadhaar: "289208127591", subject: "General" }
+  { id: "AVM26K01", name: "Ten Singh", designation: "Headmaster", email: "", mobile: "7737681970", subject: "Administration" },
+  { id: "AVM26K02", name: "Kapil Inania", designation: "Computer Teacher", email: "inaniyakapil2000@gmail.com", mobile: "9828522814", subject: "Computer / IT" },
+  { id: "AVM26K03", name: "Radha Kishan Upadhyay", designation: "Teacher", email: "", mobile: "9413257085", subject: "General" },
+  { id: "AVM26K04", name: "Pooja Parihar", designation: "Mathematics Teacher", email: "", mobile: "7014322413", subject: "Mathematics" },
+  { id: "AVM26K05", name: "Arjun Lal Nagariya", designation: "Teacher", email: "", mobile: "9004237691", subject: "General" },
+  { id: "AVM26K06", name: "Bhavana Pareek", designation: "Teacher", email: "", mobile: "8003771825", subject: "General" },
+  { id: "AVM26K07", name: "Annapurna Pareek", designation: "Teacher", email: "", mobile: "9001204531", subject: "Hindi / Sanskrit" },
+  { id: "AVM26K08", name: "Jyoti Pareek", designation: "Teacher", email: "", mobile: "8949033224", subject: "Commerce / General" },
+  { id: "AVM26K09", name: "Mahesh Kumar", designation: "Teacher", email: "", mobile: "9521852209", subject: "General" },
+  { id: "AVM26K10", name: "Indra Prajapat", designation: "Teacher", email: "", mobile: "7976189889", subject: "General" },
+  { id: "AVM26K11", name: "Priyanka Parihar", designation: "Teacher", email: "", mobile: "9001625383", subject: "General" },
+  { id: "AVM26K12", name: "Anita", designation: "Teacher", email: "", mobile: "7976288053", subject: "General" },
+  { id: "AVM26K13", name: "Priyanka Parihar", designation: "Teacher", email: "", mobile: "9001625383", subject: "General" },
+  { id: "AVM26K14", name: "Reena Sharma", designation: "Secondary Teacher", email: "reenajitendra71@gmail.com", mobile: "7976198976", subject: "Secondary" },
+  { id: "AVM26K15", name: "Jaishree Dave", designation: "Teacher", email: "", mobile: "9413087191", subject: "General" },
+  { id: "AVM26K16", name: "Vikash", designation: "Teacher", email: "", mobile: "9166928204", subject: "General" }
 ];
 
 // Application State
@@ -71,16 +72,50 @@ const state = {
     gender: "all",
     category: "all"
   },
-  currentView: window.innerWidth <= 768 ? "cards" : "table"
+  currentView: window.innerWidth <= 768 ? "cards" : "table",
+  pendingOtpEmail: "",
+  mockOtpCode: null
 };
+
+// 5-Minute Inactivity Auto-Logout Tracker
+let inactivityTimer = null;
+const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
+function resetInactivityTimer() {
+  if (inactivityTimer) clearTimeout(inactivityTimer);
+  if (!state.currentTeacher) return;
+
+  inactivityTimer = setTimeout(() => {
+    handleInactivityAutoLogout();
+  }, INACTIVITY_TIMEOUT_MS);
+}
+
+function handleInactivityAutoLogout() {
+  if (!state.currentTeacher) return;
+  const teacherName = state.currentTeacher.name;
+  localStorage.removeItem("avm_logged_teacher");
+  state.currentTeacher = null;
+  showTeacherBanner(false);
+  closeMarksModal();
+  closeSettingsModal();
+  showPortalChoiceScreen();
+  showToast(`⚠️ Logged out automatically after 5 minutes of inactivity for security. (${teacherName})`, "warning");
+}
 
 // Initialize Application
 document.addEventListener("DOMContentLoaded", () => {
   setupViewMode();
   setupEventListeners();
+  setupInactivityListeners();
   checkTeacherAuth();
   preloadForensics();
 });
+
+function setupInactivityListeners() {
+  ["mousedown", "mousemove", "keydown", "touchstart", "scroll", "click"].forEach(evt => {
+    window.addEventListener(evt, resetInactivityTimer, { passive: true });
+  });
+}
 
 /**
  * Check Teacher Authentication State
@@ -91,7 +126,9 @@ function checkTeacherAuth() {
     try {
       state.currentTeacher = JSON.parse(saved);
       showTeacherBanner(true);
+      showPortalChoiceScreen(false);
       showTeacherLoginScreen(false);
+      resetInactivityTimer();
       initConnection();
       return true;
     } catch (e) {
@@ -101,8 +138,77 @@ function checkTeacherAuth() {
 
   state.currentTeacher = null;
   showTeacherBanner(false);
-  showTeacherLoginScreen(true);
+  showPortalChoiceScreen(true);
   return false;
+}
+
+/**
+ * Screen Toggles: Role Choice vs Teacher Login
+ */
+function showPortalChoiceScreen(show = true) {
+  const choiceCard = document.getElementById("portalChoiceScreen");
+  const loginCard = document.getElementById("teacherLoginScreen");
+  const liveContent = document.getElementById("liveContentContainer");
+  const disconnected = document.getElementById("disconnectedScreen");
+  const loading = document.getElementById("loadingScreen");
+
+  if (!choiceCard) return;
+
+  if (show) {
+    choiceCard.style.display = "block";
+    if (loginCard) loginCard.style.display = "none";
+    if (liveContent) liveContent.style.display = "none";
+    if (disconnected) disconnected.style.display = "none";
+    if (loading) loading.style.display = "none";
+  } else {
+    choiceCard.style.display = "none";
+  }
+}
+
+function showTeacherLoginScreen(show = true) {
+  const choiceCard = document.getElementById("portalChoiceScreen");
+  const loginCard = document.getElementById("teacherLoginScreen");
+  const liveContent = document.getElementById("liveContentContainer");
+  const disconnected = document.getElementById("disconnectedScreen");
+  const loading = document.getElementById("loadingScreen");
+
+  if (!loginCard) return;
+
+  if (show) {
+    loginCard.style.display = "block";
+    if (choiceCard) choiceCard.style.display = "none";
+    if (liveContent) liveContent.style.display = "none";
+    if (disconnected) disconnected.style.display = "none";
+    if (loading) loading.style.display = "none";
+
+    // Default to Step 1
+    const step1 = document.getElementById("teacherLoginFormStep1");
+    const step2 = document.getElementById("teacherLoginFormStep2");
+    if (step1) step1.style.display = "flex";
+    if (step2) step2.style.display = "none";
+    document.getElementById("loginStepSubtitle").textContent = "Enter your name and registered email ID to receive a secure login OTP.";
+  } else {
+    loginCard.style.display = "none";
+  }
+}
+
+function showOtpStep2(email) {
+  state.pendingOtpEmail = email;
+  const step1 = document.getElementById("teacherLoginFormStep1");
+  const step2 = document.getElementById("teacherLoginFormStep2");
+  const targetEmailEl = document.getElementById("otpTargetEmailDisplay");
+  const subtitle = document.getElementById("loginStepSubtitle");
+
+  if (step1) step1.style.display = "none";
+  if (step2) step2.style.display = "flex";
+  if (targetEmailEl) targetEmailEl.textContent = email;
+  if (subtitle) subtitle.textContent = "Check your email for the 6-digit OTP code sent from avmsoorsagar93@gmail.com.";
+
+  const otpInput = document.getElementById("loginOtpInput");
+  if (otpInput) {
+    otpInput.value = "";
+    setTimeout(() => otpInput.focus(), 100);
+  }
 }
 
 /**
@@ -132,27 +238,6 @@ function showTeacherBanner(show) {
     }
   } else {
     banner.style.display = "none";
-  }
-}
-
-/**
- * Display / Hide Teacher Login Card
- */
-function showTeacherLoginScreen(show) {
-  const loginCard = document.getElementById("teacherLoginScreen");
-  const liveContent = document.getElementById("liveContentContainer");
-  const disconnected = document.getElementById("disconnectedScreen");
-  const loading = document.getElementById("loadingScreen");
-
-  if (!loginCard) return;
-
-  if (show) {
-    loginCard.style.display = "flex";
-    if (liveContent) liveContent.style.display = "none";
-    if (disconnected) disconnected.style.display = "none";
-    if (loading) loading.style.display = "none";
-  } else {
-    loginCard.style.display = "none";
   }
 }
 
@@ -1412,10 +1497,47 @@ function setupEventListeners() {
   document.getElementById("saveSettingsBtn").addEventListener("click", saveSettings);
   document.getElementById("testConnectionBtn").addEventListener("click", testConnection);
 
-  // Teacher Authentication Form & Logout
-  const teacherForm = document.getElementById("teacherLoginForm");
-  if (teacherForm) {
-    teacherForm.addEventListener("submit", handleTeacherLogin);
+  // Role Selection Choice Buttons
+  const teacherRoleBtn = document.getElementById("chooseTeacherRoleBtn");
+  if (teacherRoleBtn) {
+    teacherRoleBtn.addEventListener("click", () => showTeacherLoginScreen(true));
+  }
+
+  const studentRoleBtn = document.getElementById("chooseStudentRoleBtn");
+  if (studentRoleBtn) {
+    studentRoleBtn.addEventListener("click", () => {
+      showToast("🎓 Student Marksheet Portal is coming soon! Currently under active development.", "warning");
+    });
+  }
+
+  const backToRoleBtn = document.getElementById("loginBackToRoleBtn");
+  if (backToRoleBtn) {
+    backToRoleBtn.addEventListener("click", () => showPortalChoiceScreen(true));
+  }
+
+  // Teacher Authentication Step 1 & Step 2 Forms
+  const step1Form = document.getElementById("teacherLoginFormStep1");
+  if (step1Form) {
+    step1Form.addEventListener("submit", handleSendTeacherOtp);
+  }
+
+  const step2Form = document.getElementById("teacherLoginFormStep2");
+  if (step2Form) {
+    step2Form.addEventListener("submit", handleVerifyTeacherOtp);
+  }
+
+  const resendBtn = document.getElementById("resendOtpBtn");
+  if (resendBtn) {
+    resendBtn.addEventListener("click", handleResendOtp);
+  }
+
+  const changeEmailBtn = document.getElementById("changeEmailStepBtn");
+  if (changeEmailBtn) {
+    changeEmailBtn.addEventListener("click", () => {
+      document.getElementById("teacherLoginFormStep1").style.display = "flex";
+      document.getElementById("teacherLoginFormStep2").style.display = "none";
+      document.getElementById("loginStepSubtitle").textContent = "Enter your name and registered email ID to receive a secure login OTP.";
+    });
   }
 
   const teacherLogoutBtn = document.getElementById("teacherLogoutBtn");
@@ -1446,18 +1568,21 @@ function setupEventListeners() {
 }
 
 /**
- * Handle Teacher Login with case-insensitive name & 10-digit mobile verification
+ * STEP 1: Request 6-Digit OTP via Email
+ * Email sent from: avmsoorsagar93@gmail.com
  */
-async function handleTeacherLogin(e) {
+async function handleSendTeacherOtp(e) {
   if (e) e.preventDefault();
 
   const nameInput = document.getElementById("loginTeacherName");
-  const mobileInput = document.getElementById("loginTeacherMobile");
-  const alertBox = document.getElementById("loginAlertBox");
-  const submitBtn = document.getElementById("loginSubmitBtn");
+  const emailInput = document.getElementById("loginTeacherEmail");
+  const alertBox = document.getElementById("loginAlertBoxStep1");
+  const submitBtn = document.getElementById("sendOtpSubmitBtn");
 
   const rawName = (nameInput ? nameInput.value : "").trim();
-  const rawMobile = (mobileInput ? mobileInput.value : "").trim();
+  let rawEmail = (emailInput ? emailInput.value : "").trim().toLowerCase();
+  // Handle user or sheet typos (.om vs .com)
+  rawEmail = rawEmail.replace(/@gmail\.om$/i, "@gmail.com");
 
   alertBox.style.display = "none";
   alertBox.className = "login-alert-banner";
@@ -1470,53 +1595,130 @@ async function handleTeacherLogin(e) {
     return;
   }
 
-  const cleanMobile = rawMobile.replace(/\D/g, "").slice(-10);
-  if (cleanMobile.length < 10) {
-    alertBox.textContent = "Please enter a valid 10-digit Mobile Number.";
+  if (!rawEmail || !rawEmail.includes("@")) {
+    alertBox.textContent = "Please enter a valid Email ID.";
     alertBox.classList.add("error");
     alertBox.style.display = "block";
-    mobileInput.focus();
+    emailInput.focus();
     return;
   }
 
   const originalBtnHtml = submitBtn.innerHTML;
   submitBtn.disabled = true;
-  submitBtn.innerHTML = `<span>Verifying with School Records...</span>`;
+  submitBtn.innerHTML = `<span>Sending OTP from avmsoorsagar93@gmail.com...</span>`;
+
+  let otpSentSuccess = false;
+  let targetDisplayEmail = rawEmail;
+
+  // 1. Send OTP via Google Apps Script (MailApp from avmsoorsagar93@gmail.com)
+  if (state.apiUrl) {
+    try {
+      const queryUrl = `${state.apiUrl}?action=sendTeacherOtp&name=${encodeURIComponent(rawName)}&email=${encodeURIComponent(rawEmail)}`;
+      const res = await fetch(queryUrl);
+      const json = await res.json();
+      if (json.status === "success") {
+        otpSentSuccess = true;
+        targetDisplayEmail = json.emailMasked || rawEmail;
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+        alertBox.textContent = json.message || "Unauthorized login. Please connect with admin.";
+        alertBox.classList.add("error");
+        alertBox.style.display = "block";
+        return;
+      }
+    } catch (err) {
+      console.warn("Apps Script sendTeacherOtp error or offline simulation:", err);
+    }
+  }
+
+  // 2. Offline / Simulated fallback for testing when Google Script is not yet redeployed
+  if (!otpSentSuccess) {
+    const normInputName = rawName.toLowerCase().replace(/\s+/g, " ");
+    const matched = FALLBACK_STAFF_LIST.find(s => {
+      const sName = s.name.toLowerCase().replace(/\s+/g, " ");
+      const sEmail = (s.email || "").toLowerCase().trim().replace(/@gmail\.om$/i, "@gmail.com");
+      const nameMatch = (sName === normInputName || sName.includes(normInputName) || normInputName.includes(sName));
+      const emailMatch = (sEmail && sEmail === rawEmail);
+      return nameMatch && emailMatch;
+    });
+
+    if (matched) {
+      otpSentSuccess = true;
+      state.mockOtpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      state.mockStaffMatched = matched;
+      showToast(`🔑 [Testing Mode] OTP sent to ${rawEmail}: ${state.mockOtpCode}`, "success");
+    } else {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHtml;
+      alertBox.textContent = "Unauthorized login. Please connect with admin.";
+      alertBox.classList.add("error");
+      alertBox.style.display = "block";
+      return;
+    }
+  }
+
+  submitBtn.disabled = false;
+  submitBtn.innerHTML = originalBtnHtml;
+
+  // Move to Step 2
+  showToast("6-Digit OTP sent from avmsoorsagar93@gmail.com!", "success");
+  showOtpStep2(targetDisplayEmail);
+}
+
+/**
+ * STEP 2: Verify 6-Digit OTP
+ */
+async function handleVerifyTeacherOtp(e) {
+  if (e) e.preventDefault();
+
+  const otpInput = document.getElementById("loginOtpInput");
+  const alertBox = document.getElementById("loginAlertBoxStep2");
+  const submitBtn = document.getElementById("verifyOtpSubmitBtn");
+
+  const cleanOtp = (otpInput ? otpInput.value : "").trim().replace(/\D/g, "");
+
+  alertBox.style.display = "none";
+  alertBox.className = "login-alert-banner";
+
+  if (cleanOtp.length !== 6) {
+    alertBox.textContent = "Please enter the complete 6-digit OTP.";
+    alertBox.classList.add("error");
+    alertBox.style.display = "block";
+    otpInput.focus();
+    return;
+  }
+
+  const originalBtnHtml = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = `<span>Verifying OTP code...</span>`;
 
   let verifiedTeacher = null;
 
-  // 1. Live Google Sheets verification via Web App API
+  // 1. Verify OTP with Apps Script backend
   if (state.apiUrl) {
     try {
-      const queryUrl = `${state.apiUrl}?action=verifyTeacher&name=${encodeURIComponent(rawName)}&mobile=${encodeURIComponent(cleanMobile)}`;
+      const queryUrl = `${state.apiUrl}?action=verifyTeacherOtp&email=${encodeURIComponent(state.pendingOtpEmail)}&otp=${encodeURIComponent(cleanOtp)}`;
       const res = await fetch(queryUrl);
       const json = await res.json();
       if (json.status === "success" && json.teacher) {
         verifiedTeacher = json.teacher;
       }
     } catch (err) {
-      console.warn("Apps Script teacher verification endpoint error or offline fallback:", err);
+      console.warn("Apps Script verifyTeacherOtp error or offline check:", err);
     }
   }
 
-  // 2. Direct Fallback: match against school staff directory (case-insensitive & space-tolerant)
-  if (!verifiedTeacher) {
-    const normInputName = rawName.toLowerCase().replace(/\s+/g, " ");
-    const matched = FALLBACK_STAFF_LIST.find(s => {
-      const sMobile = s.mobile.replace(/\D/g, "").slice(-10);
-      const sName = s.name.toLowerCase().replace(/\s+/g, " ");
-      const mobileOk = (sMobile === cleanMobile);
-      const nameOk = (sName === normInputName || sName.includes(normInputName) || normInputName.includes(sName));
-      return mobileOk && nameOk;
-    });
-
-    if (matched) {
+  // 2. Offline / Simulated check
+  if (!verifiedTeacher && state.mockOtpCode) {
+    if (cleanOtp === state.mockOtpCode && state.mockStaffMatched) {
       verifiedTeacher = {
-        id: matched.id,
-        name: matched.name,
-        designation: matched.designation,
-        mobile: matched.mobile,
-        subject: matched.subject
+        id: state.mockStaffMatched.id,
+        name: state.mockStaffMatched.name,
+        designation: state.mockStaffMatched.designation,
+        email: state.mockStaffMatched.email,
+        mobile: state.mockStaffMatched.mobile,
+        subject: state.mockStaffMatched.subject
       };
     }
   }
@@ -1525,22 +1727,34 @@ async function handleTeacherLogin(e) {
   submitBtn.innerHTML = originalBtnHtml;
 
   if (!verifiedTeacher) {
-    alertBox.textContent = "Teacher record not found. Please verify your Name and 10-digit Mobile Number against the school staff sheet.";
+    alertBox.textContent = "Unauthorized login. Invalid OTP. Please connect with admin.";
     alertBox.classList.add("error");
     alertBox.style.display = "block";
     return;
   }
 
-  // Successful Login
+  // Verification Successful!
   state.currentTeacher = verifiedTeacher;
   localStorage.setItem("avm_logged_teacher", JSON.stringify(verifiedTeacher));
+  resetInactivityTimer();
 
-  showToast(`Welcome, ${verifiedTeacher.name}! Authenticated as ${verifiedTeacher.id}`, "success");
+  showToast(`Welcome, ${verifiedTeacher.name}! Logged in as ${verifiedTeacher.id}`, "success");
   showTeacherLoginScreen(false);
   showTeacherBanner(true);
 
   // Initialize data connection
   initConnection();
+}
+
+async function handleResendOtp() {
+  const nameInput = document.getElementById("loginTeacherName");
+  const rawName = (nameInput ? nameInput.value : "").trim();
+  if (!rawName || !state.pendingOtpEmail) {
+    document.getElementById("changeEmailStepBtn").click();
+    return;
+  }
+  showToast("Resending 6-digit OTP code...", "warning");
+  await handleSendTeacherOtp(null);
 }
 
 /**
@@ -1552,11 +1766,12 @@ function handleTeacherLogout() {
     return;
   }
 
+  if (inactivityTimer) clearTimeout(inactivityTimer);
   localStorage.removeItem("avm_logged_teacher");
   state.currentTeacher = null;
   showTeacherBanner(false);
-  showTeacherLoginScreen(true);
-  showToast("Signed out. Please log in with your Teacher credentials.", "warning");
+  showPortalChoiceScreen(true);
+  showToast("Signed out successfully.", "warning");
 }
 
 /**
@@ -1575,12 +1790,16 @@ function showLoadingScreen(show) {
 function showDisconnectedScreen(errorMsg) {
   const screen = document.getElementById("disconnectedScreen");
   const liveContent = document.getElementById("liveContentContainer");
+  const choiceCard = document.getElementById("portalChoiceScreen");
 
   if (!state.currentTeacher) {
     screen.style.display = "none";
     liveContent.style.display = "none";
+    if (choiceCard) choiceCard.style.display = "block";
     return;
   }
+
+  if (choiceCard) choiceCard.style.display = "none";
 
   if (errorMsg) {
     screen.style.display = "flex";
