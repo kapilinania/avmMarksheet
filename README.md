@@ -97,6 +97,48 @@
 
 ---
 
+### 7. 👨‍🏫 Teacher Authentication & Staff Sheet Integration
+- **Staff Sheet Auto-Discovery**: Automatically finds your teacher/staff sheet regardless of what you name the tab (`Staff`, `Teachers`, `Employee`, `Staff Details`, etc.) or scans Row 1 headers (`Current Designation`, `Employee Name`, `Mobile Number`).
+- **Flexible Login (Case-Insensitive)**:
+  - Teachers enter their **Name** and **Mobile Number**.
+  - Capital or small letters (`kapil inania`, `KAPIL INANIA`, `Kapil Inania`) and extra spaces are handled gracefully.
+  - Mobile numbers are normalized to 10 digits (ignoring spaces, hyphens, and `+91`).
+- **Teacher ID Assignment (`AVM-T01`, `AVM-T02`...)**:
+  - Automatically generates structured IDs if the sheet doesn't yet have a Teacher ID column.
+  - If a `Teacher ID` or `Emp ID` column is added to the sheet, it seamlessly reads from it.
+- **Portal Teacher Display**:
+  - Top header banner prominently displays the logged-in teacher's avatar, Name, Teacher ID, and Designation.
+  - Includes a quick "Switch / Logout" button.
+  - Marks entry modal clearly displays: `Verified Teacher Editor: [Name] [Teacher ID] ([Designation])`.
+- **Audit Logs & Comments Linked to Teacher**:
+  - Direct cell notes in Google Sheets now attribute marks changes to the specific teacher:
+    `Teacher: Kapil Inania [AVM-T02] (Computer Teacher)`
+  - End-of-sheet row audit and `'Information Sheet'` record Teacher Name, Teacher ID, and Designation in dedicated columns.
+
+---
+
+### 📋 Staff Member Reference & Suggested Teacher IDs
+
+| Teacher ID | Employee Name | Designation | Registered Mobile | Current Subject |
+|---|---|---|---|---|
+| `AVM-T01` | **Ten Singh** | Headmaster | 7737681970 | Administration / General |
+| `AVM-T02` | **Kapil Inania** | Computer Teacher | 9828522814 | Computer / IT |
+| `AVM-T03` | **Radha Kishan Upadhyay** | Teacher | 9413257085 | General |
+| `AVM-T04` | **Pooja Parihar** | Mathematics Teacher | 7014322413 | Mathematics |
+| `AVM-T05` | **Arjun Lal Nagariya** | Teacher | 9004237691 | General |
+| `AVM-T06` | **Bhavana Pareek** | Teacher | 8003771825 | General |
+| `AVM-T07` | **Annapurna Pareek** | Teacher | 9001204531 | Hindi / Sanskrit |
+| `AVM-T08` | **Jyoti Pareek** | Teacher | 8949033224 | Commerce / General |
+| `AVM-T09` | **Mahesh Kumar** | Teacher | 9521852209 | General |
+| `AVM-T10` | **Indra Prajapat** | Teacher | 7976189889 | General |
+| `AVM-T11` | **Priyanka Parihar** | Teacher | 9001625383 | General |
+| `AVM-T12` | **Anita** | Teacher | 7976288053 | General |
+| `AVM-T13` | **Reena Sharma** | Secondary Teacher | 7976198976 | Secondary |
+| `AVM-T14` | **Jaishree Dave** | Teacher | 9413087191 | General |
+| `AVM-T15` | **Vikash** | Teacher | 9166928204 | General |
+
+---
+
 ## 🚀 How to Update Google Apps Script (`Code.gs`)
 
 1. Open your Google Spreadsheet **"AvmStudentData"**.

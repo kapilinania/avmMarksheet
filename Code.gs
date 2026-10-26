@@ -138,6 +138,18 @@ function doGet(e) {
       return createJsonResponse({ status: 'success', data: result });
     }
 
+    if (action === 'verifyTeacher') {
+      const name = (e && e.parameter && e.parameter.name) ? e.parameter.name : '';
+      const mobile = (e && e.parameter && e.parameter.mobile) ? e.parameter.mobile : '';
+      const result = verifyTeacher(name, mobile);
+      return createJsonResponse(result);
+    }
+
+    if (action === 'getStaffList') {
+      const staff = getStaffMembers();
+      return createJsonResponse({ status: 'success', data: staff });
+    }
+
     if (action === 'ping') {
       return createJsonResponse({ status: 'success', message: 'AVM Marksheet API Online' });
     }
@@ -167,6 +179,13 @@ function doPost(e) {
 
     if (action === 'saveMarks') {
       const result = saveStudentMarks(className, payload.studentId, payload.examKey, payload.marks, payload.audit);
+      return createJsonResponse(result);
+    }
+
+    if (action === 'verifyTeacher') {
+      const name = payload.name || payload.employeeName || '';
+      const mobile = payload.mobile || payload.mobileNumber || '';
+      const result = verifyTeacher(name, mobile);
       return createJsonResponse(result);
     }
 
@@ -614,6 +633,11 @@ function saveStudentMarks(className, studentId, examKey, marksMap, clientAudit) 
   const securityToken = audit.fingerprint || 'FP-TOKEN';
   const timestampIST = audit.timestamp || Utilities.formatDate(new Date(), 'Asia/Kolkata', 'dd-MMM-yyyy hh:mm:ss a');
   
+  // Teacher credentials from verified login
+  const teacherName = audit.teacherName || audit.editorName || '';
+  const teacherId = audit.teacherId || '';
+  const teacherDesignation = audit.teacherDesignation || audit.designation || '';
+
   // Resolve editor email: active user session, effective user, or client-provided identity
   let editorEmail = '';
   try {
@@ -658,7 +682,7 @@ function saveStudentMarks(className, studentId, examKey, marksMap, clientAudit) 
           studentRow[colDef.obt - 1] = obtMarks;
 
           // Add cell comment / note with FULL forensic audit trail
-          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.obt), timestampIST, (prevVal !== '' && prevVal !== null) ? prevVal : '-', obtMarks, audit, examKey, subj.name, editorEmail);
+          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.obt), timestampIST, (prevVal !== '' && prevVal !== null) ? prevVal : '-', obtMarks, audit, examKey, subj.name, editorEmail, teacherName, teacherId, teacherDesignation);
 
           modifiedChanges.push({
             subject: subj.name,
@@ -671,7 +695,7 @@ function saveStudentMarks(className, studentId, examKey, marksMap, clientAudit) 
         if (prevVal !== '' && prevVal !== null) {
           sheet.getRange(actualSheetRow, colDef.obt).setValue('');
           studentRow[colDef.obt - 1] = '';
-          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.obt), timestampIST, prevVal, 'Cleared', audit, examKey, subj.name, editorEmail);
+          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.obt), timestampIST, prevVal, 'Cleared', audit, examKey, subj.name, editorEmail, teacherName, teacherId, teacherDesignation);
           modifiedChanges.push({
             subject: subj.name,
             prevMarks: prevVal,
@@ -702,7 +726,7 @@ function saveStudentMarks(className, studentId, examKey, marksMap, clientAudit) 
           sheet.getRange(actualSheetRow, colDef.theoObt).setValue(theoObt);
           studentRow[colDef.theoObt - 1] = theoObt;
 
-          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.theoObt), timestampIST, (prevTheo !== '' && prevTheo !== null) ? prevTheo : '-', theoObt, audit, examKey + ' (Theory)', subj.name, editorEmail);
+          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.theoObt), timestampIST, (prevTheo !== '' && prevTheo !== null) ? prevTheo : '-', theoObt, audit, examKey + ' (Theory)', subj.name, editorEmail, teacherName, teacherId, teacherDesignation);
           modifiedChanges.push({
             subject: subj.name + ' (Theory)',
             prevMarks: (prevTheo !== '' && prevTheo !== null) ? prevTheo : '-',
@@ -714,7 +738,7 @@ function saveStudentMarks(className, studentId, examKey, marksMap, clientAudit) 
         if (prevTheo !== '' && prevTheo !== null) {
           sheet.getRange(actualSheetRow, colDef.theoObt).setValue('');
           studentRow[colDef.theoObt - 1] = '';
-          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.theoObt), timestampIST, prevTheo, 'Cleared', audit, examKey + ' (Theory)', subj.name, editorEmail);
+          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.theoObt), timestampIST, prevTheo, 'Cleared', audit, examKey + ' (Theory)', subj.name, editorEmail, teacherName, teacherId, teacherDesignation);
         }
       }
 
@@ -731,7 +755,7 @@ function saveStudentMarks(className, studentId, examKey, marksMap, clientAudit) 
           sheet.getRange(actualSheetRow, colDef.pracObt).setValue(pracObt);
           studentRow[colDef.pracObt - 1] = pracObt;
 
-          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.pracObt), timestampIST, (prevPrac !== '' && prevPrac !== null) ? prevPrac : '-', pracObt, audit, examKey + ' (Practical)', subj.name, editorEmail);
+          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.pracObt), timestampIST, (prevPrac !== '' && prevPrac !== null) ? prevPrac : '-', pracObt, audit, examKey + ' (Practical)', subj.name, editorEmail, teacherName, teacherId, teacherDesignation);
           modifiedChanges.push({
             subject: subj.name + ' (Practical)',
             prevMarks: (prevPrac !== '' && prevPrac !== null) ? prevPrac : '-',
@@ -743,7 +767,7 @@ function saveStudentMarks(className, studentId, examKey, marksMap, clientAudit) 
         if (prevPrac !== '' && prevPrac !== null) {
           sheet.getRange(actualSheetRow, colDef.pracObt).setValue('');
           studentRow[colDef.pracObt - 1] = '';
-          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.pracObt), timestampIST, prevPrac, 'Cleared', audit, examKey + ' (Practical)', subj.name, editorEmail);
+          addCellAuditNote(sheet.getRange(actualSheetRow, colDef.pracObt), timestampIST, prevPrac, 'Cleared', audit, examKey + ' (Practical)', subj.name, editorEmail, teacherName, teacherId, teacherDesignation);
         }
       }
     }
@@ -760,25 +784,32 @@ function saveStudentMarks(className, studentId, examKey, marksMap, clientAudit) 
     ? modifiedChanges.map(function(m) { return m.subject + ': ' + m.newMarks; }).join('; ')
     : 'Marks Verified/Saved';
 
+  const teacherAuditSummary = teacherName 
+    ? (teacherName + (teacherId ? ' [' + teacherId + ']' : '') + (teacherDesignation ? ' (' + teacherDesignation + ')' : ''))
+    : editorEmail;
+
   ensureAuditHeadersExist(sheet, layout);
   sheet.getRange(actualSheetRow, layout.auditColumns.startCol, 1, 8).setValues([
     [
       timestampIST,
+      teacherAuditSummary,
       editorEmail,
       phoneModel,
       macAddress,
       deviceId,
       ipAddress + (ispName ? ' (' + ispName + ')' : '') + ' [' + locationInfo + ']',
-      hardwareSpecs + ' | ' + batteryStatus,
       changesSummary
     ]
   ]);
 
-  // 6. Log to 'Information Sheet' tab (Full 16 Forensic Columns)
+  // 6. Log to 'Information Sheet' tab (Full Forensic Columns)
   if (modifiedChanges.length > 0) {
     logToInformationSheet(SpreadsheetApp.getActiveSpreadsheet(), {
       timestamp: timestampIST,
       className: className,
+      teacherName: teacherName,
+      teacherId: teacherId,
+      teacherDesignation: teacherDesignation,
       srNo: studentSrNo,
       studentName: studentName,
       examKey: examKey,
@@ -810,21 +841,25 @@ function saveStudentMarks(className, studentId, examKey, marksMap, clientAudit) 
 /**
  * Add / Append Complete Forensic Cell Note (Comment) to Sheet
  */
-function addCellAuditNote(cell, timestamp, prevVal, newVal, audit, examName, subjName, email) {
+function addCellAuditNote(cell, timestamp, prevVal, newVal, audit, examName, subjName, email, teacherName, teacherId, designation) {
   try {
     const existingNote = cell.getNote() || '';
+    const teacherDisplay = teacherName 
+      ? (teacherName + (teacherId ? ' [' + teacherId + ']' : '') + (designation ? ' (' + designation + ')' : ''))
+      : 'Authorized Staff';
+
     const noteLines = [
       '[' + timestamp + ']',
+      'Teacher: ' + teacherDisplay,
       'Subject: ' + subjName + ' (' + examName + ')',
-      'Marks Change: ' + prevVal + ' ➔ ' + newVal,
+      'Marks: ' + prevVal + ' ➔ ' + newVal,
       '----------------------------------------',
+      'Phone/Device: ' + (audit.phoneModel || audit.device || 'Mobile Device'),
+      'Device ID: ' + (audit.deviceId || 'DEV-N/A') + (audit.fingerprint ? ' (' + audit.fingerprint + ')' : ''),
       'Editor Email: ' + email,
-      'Device/Phone: ' + (audit.phoneModel || audit.device || 'Mobile Device'),
       'MAC Address: ' + (audit.macAddress || 'N/A'),
-      'Device UUID: ' + (audit.deviceId || 'N/A'),
       'IP Address: ' + (audit.ip || 'Direct WebApp') + (audit.isp ? ' (' + audit.isp + ')' : ''),
       'Location: ' + (audit.location || 'India'),
-      'Security Token: ' + (audit.fingerprint || 'N/A'),
       'Hardware Specs: ' + (audit.specs || 'Standard Screen'),
       'Battery Status: ' + (audit.battery || 'Normal')
     ];
@@ -846,12 +881,12 @@ function ensureAuditHeadersExist(sheet, layout) {
     if (!headerCell || !headerCell.toString().toLowerCase().includes('audit')) {
       const headers = [
         'Audit: Last Modified (IST)',
+        'Audit: Teacher Name & ID',
         'Audit: Editor Email',
         'Audit: Phone / Device Model',
         'Audit: MAC Address',
         'Audit: Device UUID',
         'Audit: IP & Location',
-        'Audit: Hardware Specs',
         'Audit: Changes Summary'
       ];
       sheet.getRange(1, layout.auditColumns.startCol, 1, headers.length).setValues([headers])
@@ -863,31 +898,35 @@ function ensureAuditHeadersExist(sheet, layout) {
 }
 
 /**
- * Append complete audit entries to dedicated 'Information Sheet' tab (16 Forensic Columns)
+ * Append complete audit entries to dedicated 'Information Sheet' tab (Full Forensic Columns)
  */
 function logToInformationSheet(ss, data) {
   try {
     let infoSheet = ss.getSheetByName('Information Sheet');
+    const headers = [
+      'Timestamp (IST)',
+      'Class',
+      'Teacher Name',
+      'Teacher ID',
+      'Teacher Designation',
+      'Student SR No.',
+      'Student Name',
+      'Exam Name',
+      'Subject',
+      'Previous Marks',
+      'New Marks Entered',
+      'Device / Phone Model',
+      'MAC Address',
+      'Device UUID',
+      'IP Address & ISP',
+      'Location (City/State)',
+      'Security Fingerprint',
+      'Hardware Specs & Battery',
+      'Editor Email ID'
+    ];
+
     if (!infoSheet) {
       infoSheet = ss.insertSheet('Information Sheet');
-      const headers = [
-        'Timestamp (IST)',
-        'Class',
-        'Student SR No.',
-        'Student Name',
-        'Exam Name',
-        'Subject',
-        'Previous Marks',
-        'New Marks Entered',
-        'Device / Phone Model',
-        'MAC Address',
-        'Device UUID',
-        'IP Address & ISP',
-        'Location (City/State)',
-        'Security Fingerprint',
-        'Hardware Specs & Battery',
-        'Editor Email ID'
-      ];
       infoSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
       infoSheet.getRange(1, 1, 1, headers.length)
         .setBackground('#1e3a8a')
@@ -895,6 +934,16 @@ function logToInformationSheet(ss, data) {
         .setFontWeight('bold')
         .setHorizontalAlignment('center');
       infoSheet.setFrozenRows(1);
+    } else {
+      const col3Header = infoSheet.getRange(1, 3).getValue();
+      if (!col3Header || !String(col3Header).toLowerCase().includes('teacher')) {
+        infoSheet.getRange(1, 1, 1, headers.length).setValues([headers])
+          .setBackground('#1e3a8a')
+          .setFontColor('#ffffff')
+          .setFontWeight('bold')
+          .setHorizontalAlignment('center');
+        infoSheet.setFrozenRows(1);
+      }
     }
 
     const examLabels = {
@@ -911,6 +960,9 @@ function logToInformationSheet(ss, data) {
       rowsToAppend.push([
         data.timestamp,
         data.className,
+        data.teacherName || 'Authorized Staff',
+        data.teacherId || 'TCH-001',
+        data.teacherDesignation || '',
         data.srNo,
         data.studentName,
         examDisplayName,
@@ -930,7 +982,7 @@ function logToInformationSheet(ss, data) {
 
     if (rowsToAppend.length > 0) {
       const nextRow = infoSheet.getLastRow() + 1;
-      infoSheet.getRange(nextRow, 1, rowsToAppend.length, 16).setValues(rowsToAppend);
+      infoSheet.getRange(nextRow, 1, rowsToAppend.length, headers.length).setValues(rowsToAppend);
     }
   } catch (err) {
     Logger.log('Information Sheet write error: ' + err);
@@ -1141,4 +1193,243 @@ function formatCleanId(val) {
 function createJsonResponse(data) {
   return ContentService.createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * ============================================================================
+ * TEACHER / STAFF AUTHENTICATION & DIRECT SHEET INTEGRATION
+ * ============================================================================
+ */
+
+/**
+ * Automatically locate Staff/Teacher sheet regardless of tab name
+ */
+function getStaffSheet(ss) {
+  if (!ss) ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ss.getSheets();
+
+  // 1. Check common tab name variants
+  const candidates = [
+    'staff', 'teacher', 'teachers', 'employee', 'employees',
+    'staff details', 'teacher details', 'staff data', 'staff list',
+    'faculty', 'faculty list', 'karmchari'
+  ];
+
+  for (let i = 0; i < sheets.length; i++) {
+    const sName = sheets[i].getName().trim().toLowerCase();
+    for (let c = 0; c < candidates.length; c++) {
+      if (sName === candidates[c] || sName.includes(candidates[c])) {
+        return sheets[i];
+      }
+    }
+  }
+
+  // 2. Scan Row 1 headers of all non-class sheets
+  for (let i = 0; i < sheets.length; i++) {
+    const s = sheets[i];
+    const sName = s.getName().trim().toLowerCase();
+    if (sName === 'information sheet' || sName === 'audit log' || sName.match(/^(1st|2nd|3rd|[4-9]th|10th)$/i)) continue;
+
+    if (s.getLastRow() >= 1 && s.getLastColumn() >= 5) {
+      const firstRowVals = s.getRange(1, 1, 1, Math.min(s.getLastColumn(), 25)).getValues()[0];
+      const joined = firstRowVals.map(function(v) { return String(v || '').toLowerCase(); }).join(' ');
+      if (joined.includes('employee name') || (joined.includes('designation') && joined.includes('mobile'))) {
+        return s;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Dynamically map column positions from the Staff Sheet header row
+ */
+function resolveStaffLayout(sheet) {
+  const lastCol = Math.max(sheet.getLastColumn(), 20);
+  const headerVals = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+
+  let cols = {
+    designation: 1,
+    aadhaar: 2,
+    name: 3,
+    fatherName: 4,
+    husbandName: 5,
+    dob: 6,
+    gender: 7,
+    category: 8,
+    mobile: 12,
+    subject: 17,
+    teacherId: 0
+  };
+
+  headerVals.forEach(function(val, idx) {
+    const colNum = idx + 1;
+    const h = String(val || '').toLowerCase().trim();
+    if (!h) return;
+
+    if (h.includes('employee name') || (h.includes('name') && !h.includes('father') && !h.includes('husband'))) {
+      cols.name = colNum;
+    } else if (h.includes('mobile') || h.includes('phone') || h.includes('contact')) {
+      cols.mobile = colNum;
+    } else if (h.includes('designation') || h.includes('post')) {
+      cols.designation = colNum;
+    } else if (h.includes('aadhaar') || h.includes('aadhar')) {
+      cols.aadhaar = colNum;
+    } else if (h.includes('father')) {
+      cols.fatherName = colNum;
+    } else if (h.includes('husband')) {
+      cols.husbandName = colNum;
+    } else if (h.includes('teacher id') || h.includes('teacher_id') || h.includes('empid') || h.includes('emp id') || h.includes('staff id')) {
+      cols.teacherId = colNum;
+    } else if (h.includes('subject')) {
+      cols.subject = colNum;
+    }
+  });
+
+  return cols;
+}
+
+/**
+ * Get all staff members with assigned/detected Teacher IDs
+ */
+function getStaffMembers() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = getStaffSheet(ss);
+  if (!sheet) return [];
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+
+  const layout = resolveStaffLayout(sheet);
+  const lastCol = sheet.getLastColumn();
+  const data = sheet.getRange(2, 1, lastRow - 1, lastCol).getValues();
+
+  const staff = [];
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    const name = String(row[layout.name - 1] || '').trim();
+    if (!name || name.toLowerCase().includes('employee name') || name.toLowerCase().includes('total')) continue;
+
+    let mobile = String(row[layout.mobile - 1] || '').trim();
+    if (typeof row[layout.mobile - 1] === 'number') {
+      mobile = row[layout.mobile - 1].toLocaleString('fullwide', { useGrouping: false });
+    }
+
+    let aadhaar = String(row[layout.aadhaar - 1] || '').trim();
+    if (typeof row[layout.aadhaar - 1] === 'number') {
+      aadhaar = row[layout.aadhaar - 1].toLocaleString('fullwide', { useGrouping: false });
+    }
+
+    let designation = String(row[layout.designation - 1] || '').trim();
+    let subject = layout.subject > 0 ? String(row[layout.subject - 1] || '').trim() : '';
+
+    // If teacher ID column exists in sheet, read it
+    let teacherId = '';
+    if (layout.teacherId > 0) {
+      teacherId = String(row[layout.teacherId - 1] || '').trim();
+    }
+    // Auto-generate consistent teacher ID if not present in sheet: AVM-T01, AVM-T02...
+    if (!teacherId) {
+      const padNum = (i + 1) < 10 ? ('0' + (i + 1)) : String(i + 1);
+      teacherId = 'AVM-T' + padNum;
+    }
+
+    staff.push({
+      teacherId: teacherId,
+      employeeName: name,
+      mobileNumber: mobile,
+      designation: designation || 'Teacher',
+      currentSubject: subject,
+      aadhaarNumber: aadhaar,
+      rowIndex: i + 2
+    });
+  }
+
+  return staff;
+}
+
+/**
+ * Verify Teacher Login with case-insensitive name and normalized 10-digit mobile number
+ */
+function verifyTeacher(inputName, inputMobile) {
+  try {
+    const rawName = String(inputName || '').trim();
+    const rawMobile = String(inputMobile || '').trim();
+
+    if (!rawName || !rawMobile) {
+      return {
+        status: 'error',
+        message: 'Please enter both Teacher Name and Mobile Number.'
+      };
+    }
+
+    // Clean inputs: lowercase, collapse multiple whitespace
+    const normInputName = rawName.toLowerCase().replace(/\s+/g, ' ');
+    // Clean mobile: extract 10 digits
+    const normInputMobile = rawMobile.replace(/\D/g, '').slice(-10);
+
+    if (normInputMobile.length < 10) {
+      return {
+        status: 'error',
+        message: 'Please enter a valid 10-digit Mobile Number.'
+      };
+    }
+
+    const staffList = getStaffMembers();
+    if (!staffList || staffList.length === 0) {
+      return {
+        status: 'error',
+        message: 'Staff sheet not found or empty in this Google Spreadsheet.'
+      };
+    }
+
+    let matchedStaff = null;
+
+    for (let i = 0; i < staffList.length; i++) {
+      const s = staffList[i];
+      const sMobile = String(s.mobileNumber || '').replace(/\D/g, '').slice(-10);
+      const sName = String(s.employeeName || '').toLowerCase().replace(/\s+/g, ' ');
+
+      if (sMobile !== normInputMobile) continue;
+
+      // Mobile matches! Now verify Name (case-insensitive & whitespace tolerant)
+      if (sName === normInputName || sName.includes(normInputName) || normInputName.includes(sName)) {
+        matchedStaff = s;
+        break;
+      }
+    }
+
+    if (!matchedStaff) {
+      return {
+        status: 'error',
+        message: 'Teacher details not found. Please verify your Name and 10-digit Mobile Number.'
+      };
+    }
+
+    return {
+      status: 'success',
+      teacher: {
+        id: matchedStaff.teacherId,
+        name: matchedStaff.employeeName,
+        designation: matchedStaff.designation,
+        mobile: matchedStaff.mobileNumber,
+        subject: matchedStaff.currentSubject,
+        aadhaarMasked: maskAadhaar(matchedStaff.aadhaarNumber)
+      }
+    };
+  } catch (err) {
+    return {
+      status: 'error',
+      message: 'Server error during verification: ' + err.toString()
+    };
+  }
+}
+
+function maskAadhaar(val) {
+  const digits = String(val || '').replace(/\D/g, '');
+  if (digits.length >= 4) {
+    return 'XXXX-XXXX-' + digits.slice(-4);
+  }
+  return digits ? 'XXXX-XXXX' : '—';
 }

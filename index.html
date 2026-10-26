@@ -58,8 +58,93 @@
     </div>
   </header>
 
+  <!-- VERIFIED TEACHER BANNER (Visible when teacher is authenticated) -->
+  <aside class="teacher-banner" id="teacherBanner" style="display: none;">
+    <div class="teacher-banner-left">
+      <div class="teacher-avatar" id="teacherAvatar">TI</div>
+      <div class="teacher-banner-info">
+        <div class="teacher-name-row">
+          <span class="teacher-banner-name" id="teacherBannerName">Kapil Inania</span>
+          <span class="teacher-badge-id" id="teacherBadgeId">AVM-T02</span>
+        </div>
+        <span class="teacher-banner-role" id="teacherBannerRole">Computer Teacher</span>
+      </div>
+    </div>
+    <button class="teacher-logout-touch-btn" id="teacherLogoutBtn" title="Logout / Switch Teacher" aria-label="Switch Teacher">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+      </svg>
+      <span>Switch</span>
+    </button>
+  </aside>
+
   <!-- MAIN APP CONTAINER -->
   <main class="app-viewport">
+
+    <!-- TEACHER LOGIN SCREEN (Shown before entering portal) -->
+    <section class="mobile-state-card teacher-login-card" id="teacherLoginScreen" style="display: none;">
+      <div class="teacher-login-badge">
+        <div class="login-badge-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+        </div>
+        <span class="login-sub-tag">AVM FACULTY ACCESS</span>
+      </div>
+
+      <div class="teacher-login-header">
+        <h2 class="teacher-login-title">Teacher Portal Login</h2>
+        <p class="teacher-login-subtitle">शिक्षक प्रवेश • Enter your name and registered mobile number to access marksheets & student records.</p>
+      </div>
+
+      <form id="teacherLoginForm" class="teacher-login-form" autocomplete="on">
+        <div class="form-group-touch">
+          <label for="loginTeacherName" class="form-label-touch">
+            <span>Teacher Name / शिक्षक का नाम</span>
+            <span class="badge-accent">Case-Insensitive</span>
+          </label>
+          <div class="input-with-icon">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <input type="text" id="loginTeacherName" class="touch-input" placeholder="e.g. Kapil Inania or kapil inania" required autocomplete="name">
+          </div>
+        </div>
+
+        <div class="form-group-touch">
+          <label for="loginTeacherMobile" class="form-label-touch">
+            <span>Mobile Number / मोबाइल नंबर</span>
+            <span class="badge-accent">10 Digits</span>
+          </label>
+          <div class="input-with-icon">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            <input type="tel" id="loginTeacherMobile" class="touch-input" placeholder="e.g. 9828522814" maxlength="10" inputmode="numeric" pattern="[0-9]{10}" required autocomplete="tel">
+          </div>
+        </div>
+
+        <div class="login-tip-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <span>Matches school staff records automatically. Edits are recorded with your Teacher ID and Name in cell comments and audit logs.</span>
+        </div>
+
+        <div id="loginAlertBox" class="login-alert-banner" style="display: none;"></div>
+
+        <button type="submit" class="touch-btn primary btn-full-touch" id="loginSubmitBtn">
+          <span>Enter Portal</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </form>
+    </section>
 
     <!-- DISCONNECTED STATE SCREEN (Shown when Apps Script is not connected) -->
     <section class="mobile-state-card" id="disconnectedScreen" style="display: none;">
@@ -335,6 +420,14 @@
               <span class="detail-label">Class</span>
               <strong id="modalClass">Class 9th</strong>
             </div>
+          </div>
+          <div class="profile-teacher-signoff">
+            <span class="signoff-label">✍️ Verified Teacher Editor:</span>
+            <span class="signoff-value">
+              <strong id="modalTeacherName">—</strong>
+              <span class="teacher-id-chip" id="modalTeacherId">AVM-T01</span>
+              <span class="teacher-role-tag" id="modalTeacherRole">(Faculty)</span>
+            </span>
           </div>
         </div>
 

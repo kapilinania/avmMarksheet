@@ -259,6 +259,326 @@ body {
 }
 
 /* ==========================================================================
+   TEACHER BANNER (Sticky below app bar when authenticated)
+   ========================================================================== */
+.teacher-banner {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 6px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  box-shadow: 0 3px 8px rgba(30, 58, 138, 0.25);
+  box-sizing: border-box;
+}
+
+.teacher-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.teacher-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #1e3a8a;
+  font-weight: 900;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid #93c5fd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.teacher-banner-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.teacher-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.teacher-banner-name {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.teacher-badge-id {
+  background: #3b82f6;
+  color: #eff6ff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.teacher-banner-role {
+  font-size: 0.7rem;
+  color: #bfdbfe;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.teacher-logout-touch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 32px;
+  flex-shrink: 0;
+}
+
+.teacher-logout-touch-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ==========================================================================
+   TEACHER LOGIN SCREEN / CARD
+   ========================================================================== */
+.teacher-login-card {
+  max-width: 460px;
+  width: 100%;
+  margin: 12px auto;
+  padding: 24px 20px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.teacher-login-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.login-badge-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.login-badge-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.login-sub-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--primary);
+}
+
+.teacher-login-header {
+  margin-bottom: 18px;
+}
+
+.teacher-login-title {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0 0 4px;
+}
+
+.teacher-login-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.teacher-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-group-touch {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-label-touch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.badge-accent {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-icon .input-icon {
+  position: absolute;
+  left: 12px;
+  width: 18px;
+  height: 18px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.input-with-icon .touch-input {
+  width: 100%;
+  height: 44px;
+  padding: 10px 12px 10px 38px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.input-with-icon .touch-input:focus {
+  background: #ffffff;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+}
+
+.login-tip-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 0.74rem;
+  color: #166534;
+  line-height: 1.4;
+}
+
+.login-tip-box svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.login-alert-banner {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.login-alert-banner.error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.login-alert-banner.success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+/* Modal Teacher Signoff Pill */
+.profile-teacher-signoff {
+  margin-top: 8px;
+  padding: 7px 10px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.signoff-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #166534;
+}
+
+.signoff-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #0f172a;
+}
+
+.teacher-id-chip {
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.teacher-role-tag {
+  font-size: 0.7rem;
+  color: #475569;
+}
+
+/* ==========================================================================
    BUTTONS & TOUCH CONTROLS
    ========================================================================== */
 .touch-btn {
