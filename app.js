@@ -50,9 +50,15 @@ const FALLBACK_STAFF_LIST = [
   { id: "AVM26K16", name: "Vikash", designation: "Teacher", email: "", mobile: "9166928204", subject: "General" }
 ];
 
+// Permanent Google Apps Script Web App Deployment URL
+const HARDCODED_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZSUnM9Ekzbb32dfW0lofLixfQaNrGM9grYdCQccwC25pS0qCBJINfFE_ocFuMU-3HOw/exec";
+try {
+  localStorage.setItem("avm_apps_script_url", HARDCODED_APPS_SCRIPT_URL);
+} catch (e) {}
+
 // Application State
 const state = {
-  apiUrl: localStorage.getItem("avm_apps_script_url") || "https://script.google.com/macros/s/AKfycbxMI5ujCVBMt9rcD2-Oow_rncqX1qgHYREhhkuibJrDpcUcrhGgVfkmtnfkBboOhXIXew/exec",
+  apiUrl: HARDCODED_APPS_SCRIPT_URL,
   isConnected: false,
   currentTeacher: null,
   classesList: [],
@@ -1490,12 +1496,14 @@ function setupEventListeners() {
     showToast("Synced live data with Google Sheet!", "success");
   });
 
-  // Settings Modal
-  document.getElementById("settingsBtn").addEventListener("click", openSettingsModal);
-  document.getElementById("connectSheetBtn").addEventListener("click", openSettingsModal);
-  document.getElementById("settingsCloseBtn").addEventListener("click", closeSettingsModal);
-  document.getElementById("saveSettingsBtn").addEventListener("click", saveSettings);
-  document.getElementById("testConnectionBtn").addEventListener("click", testConnection);
+  // Disconnected screen retry button
+  const retryBtn = document.getElementById("connectSheetBtn");
+  if (retryBtn) {
+    retryBtn.addEventListener("click", () => {
+      showToast("Retrying connection to Google Sheet...", "info");
+      initConnection();
+    });
+  }
 
   // Role Selection Choice Buttons
   const teacherRoleBtn = document.getElementById("chooseTeacherRoleBtn");
@@ -1827,53 +1835,12 @@ function updateConnectionUI(connected) {
 }
 
 /**
- * Settings Modal
+ * Settings Modal Stubs (Frontend configuration UI removed as requested)
  */
-function openSettingsModal() {
-  document.getElementById("scriptUrlInput").value = state.apiUrl;
-  const statusCard = document.getElementById("settingsTestStatus");
-  statusCard.innerHTML = state.isConnected 
-    ? `<span style="color:#059669;">● Connected to Google Sheet</span>`
-    : `<span style="color:#dc2626;">● Disconnected from Google Sheet</span>`;
-  document.getElementById("settingsModal").style.display = "flex";
-}
-
-function closeSettingsModal() {
-  document.getElementById("settingsModal").style.display = "none";
-}
-
-async function saveSettings() {
-  const url = document.getElementById("scriptUrlInput").value.trim();
-  state.apiUrl = url;
-  localStorage.setItem("avm_apps_script_url", url);
-  closeSettingsModal();
-
-  showToast("Connecting to Google Sheet...", "warning");
-  await initConnection();
-}
-
-async function testConnection() {
-  const url = document.getElementById("scriptUrlInput").value.trim();
-  const statusBox = document.getElementById("settingsTestStatus");
-
-  if (!url) {
-    statusBox.innerHTML = `<span style="color:#dc2626;">Please enter Web App URL</span>`;
-    return;
-  }
-
-  statusBox.innerHTML = `<span>Pinging Google Apps Script...</span>`;
-  try {
-    const res = await fetch(`${url}?action=ping`);
-    const data = await res.json();
-    if (data.status === "success") {
-      statusBox.innerHTML = `<span style="color:#059669;">✅ Connection Successful!</span>`;
-    } else {
-      statusBox.innerHTML = `<span style="color:#dc2626;">Error: ${data.message}</span>`;
-    }
-  } catch (err) {
-    statusBox.innerHTML = `<span style="color:#dc2626;">Failed: ${err.message}. Make sure Web App access is set to "Anyone".</span>`;
-  }
-}
+function openSettingsModal() {}
+function closeSettingsModal() {}
+async function saveSettings() {}
+async function testConnection() {}
 
 /**
  * Toast Notifications
