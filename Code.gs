@@ -1384,6 +1384,26 @@ function getStaffMembers() {
 }
 
 /**
+ * ONE-CLICK AUTHORIZATION FUNCTION
+ * Run this function ONCE inside the Apps Script editor to authorize email sending permissions.
+ * 
+ * Steps:
+ * 1. Select 'authorizeEmailSending' in the toolbar dropdown at the top of Apps Script editor.
+ * 2. Click 'Run'.
+ * 3. In the popup: Click 'Review permissions' -> Select your Google Account -> Click 'Advanced' -> Click 'Go to project (unsafe)' -> Click 'Allow'.
+ */
+function authorizeEmailSending() {
+  const userEmail = Session.getActiveUser().getEmail() || Session.getEffectiveUser().getEmail() || 'avmsoorsagar93@gmail.com';
+  Logger.log('Authorizing email sending for: ' + userEmail);
+  MailApp.sendEmail({
+    to: userEmail,
+    subject: '✅ AVM School Portal - Email Permissions Authorized',
+    htmlBody: '<p>Great! Email permissions have been successfully authorized. Your Marksheet Portal can now send OTP emails to teachers.</p>'
+  });
+  return 'Authorization successful!';
+}
+
+/**
  * Send 6-Digit Random OTP to Teacher Email
  * Sender account: avmsoorsagar93@gmail.com
  */
@@ -1478,12 +1498,25 @@ function sendTeacherOtp(inputName, inputEmail) {
         '<p style="font-size: 11px; color: #94a3b8; text-align: center; margin: 0;">Automated security notification sent from ' + schoolEmail + '</p>' +
       '</div>';
 
-    MailApp.sendEmail({
-      to: cleanInputEmail,
-      subject: emailSubject,
-      htmlBody: htmlBody,
-      name: 'AVM School Portal (avmsoorsagar93@gmail.com)'
-    });
+    try {
+      MailApp.sendEmail({
+        to: cleanInputEmail,
+        replyTo: schoolEmail,
+        subject: emailSubject,
+        htmlBody: htmlBody,
+        name: 'AVM School Soorsagar (' + schoolEmail + ')'
+      });
+    } catch (mailErr) {
+      try {
+        GmailApp.sendEmail(cleanInputEmail, emailSubject, '', {
+          htmlBody: htmlBody,
+          replyTo: schoolEmail,
+          name: 'AVM School Soorsagar (' + schoolEmail + ')'
+        });
+      } catch (gmailErr) {
+        throw new Error('Email permission required in Apps Script. In Apps Script Editor, select "authorizeEmailSending" from the top dropdown, click "Run", and click "Allow". (Detail: ' + mailErr.toString() + ')');
+      }
+    }
 
     return {
       status: 'success',
@@ -1493,7 +1526,7 @@ function sendTeacherOtp(inputName, inputEmail) {
   } catch (err) {
     return {
       status: 'error',
-      message: 'Error sending OTP email: ' + err.toString() + '. Please connect with admin.'
+      message: err.message || ('Error sending OTP email: ' + err.toString())
     };
   }
 }
