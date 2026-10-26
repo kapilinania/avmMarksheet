@@ -82,7 +82,7 @@
   <main class="app-viewport">
 
     <!-- PORTAL ROLE SELECTION SCREEN (Teacher vs Student Login) -->
-    <section class="mobile-state-card portal-choice-card" id="portalChoiceScreen" style="display: none;">
+    <section class="portal-choice-card" id="portalChoiceScreen" style="display: none;">
       
       <!-- INSTITUTION HERO HEADER -->
       <header class="choice-school-header">
@@ -98,17 +98,37 @@
         </div>
 
         <div class="school-header-text">
-          <span class="school-affiliation-pill">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-            RBSE AFFILIATED • SR. SEC. SCHOOL
-          </span>
+          <div class="school-header-top-badges">
+            <span class="school-affiliation-pill">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              RBSE AFFILIATED • SR. SEC. SCHOOL
+            </span>
+            <span class="session-hero-pill">Session 2026–27</span>
+          </div>
+
           <h2 class="choice-school-hi">आदर्श विद्या मंदिर उच्च माध्यमिक विद्यालय</h2>
           <h3 class="choice-school-en">ADARSH VIDYA MANDIR SR. SEC. SCHOOL</h3>
-          <p class="choice-location">Soorsagar, Jodhpur (Rajasthan) • Academic Session 2026–27</p>
+          <p class="choice-location">Soorsagar, Jodhpur (Rajasthan) • Student Marksheet &amp; Evaluation Portal</p>
+          
+          <div class="header-features-row">
+            <span class="header-feature-chip">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Auto Marks &amp; Rank Engine
+            </span>
+            <span class="header-feature-chip">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              OTP Secure Faculty Access
+            </span>
+            <span class="header-feature-chip">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Cloud Google Sheet Sync
+            </span>
+          </div>
+
           <div class="choice-divider-line"></div>
-          <p class="choice-sub-lead">Student Marksheet &amp; Evaluation Portal • Select your portal role below:</p>
+          <p class="choice-sub-lead">Please choose your access portal below to proceed:</p>
         </div>
       </header>
 
@@ -276,7 +296,7 @@
     </section>
 
     <!-- TEACHER LOGIN SCREEN (2-Step Email & OTP Verification) -->
-    <section class="mobile-state-card teacher-login-card" id="teacherLoginScreen" style="display: none;">
+    <section class="teacher-login-card" id="teacherLoginScreen" style="display: none;">
       
       <!-- Top Bar: Back to Role Select & Security Badge -->
       <div class="login-card-top-nav">

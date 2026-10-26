@@ -65,11 +65,11 @@ body {
   overflow-x: hidden;
   overscroll-behavior-x: contain;
   position: relative;
-  background-color: #f8fafc;
+  background-color: #f1f5f9;
   background-image: 
-    radial-gradient(circle at 50% 0%, rgba(224, 231, 255, 0.6) 0%, transparent 60%),
-    radial-gradient(circle at 90% 90%, rgba(254, 243, 199, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 10% 90%, rgba(224, 242, 254, 0.4) 0%, transparent 50%);
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(37, 99, 235, 0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(217, 119, 6, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 0% 100%, rgba(30, 64, 175, 0.08) 0%, transparent 60%);
   background-attachment: fixed;
   color: var(--text-main);
   font-family: var(--font-sans);
@@ -168,6 +168,25 @@ body {
   .top-touch-btn {
     width: 32px;
     height: 32px;
+  }
+}
+
+/* Header Desktop Luxury Tuning */
+@media (min-width: 768px) {
+  .app-bar-inner {
+    padding: 10px 24px;
+    gap: 16px;
+  }
+  .brand-badge-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+  .brand-name {
+    font-size: 1.15rem;
+  }
+  .brand-school {
+    font-size: 0.8rem;
   }
 }
 
@@ -373,25 +392,38 @@ body {
    ROLE SELECTION SCREEN (Teacher vs Student Login)
    ========================================================================== */
 .portal-choice-card {
-  max-width: 860px;
+  max-width: 1060px;
   width: 100%;
-  margin: 18px auto;
-  padding: 32px 26px 24px;
+  margin: 24px auto 40px;
+  padding: 42px 48px 32px;
   background: #ffffff;
-  border: 1px solid rgba(203, 213, 225, 0.85);
-  border-radius: 22px;
-  box-shadow: 0 20px 45px -15px rgba(30, 58, 138, 0.12), 0 4px 12px rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  border-radius: 26px;
+  box-shadow: 
+    0 25px 60px -15px rgba(30, 58, 138, 0.12),
+    0 10px 24px -5px rgba(15, 23, 42, 0.05),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
   box-sizing: border-box;
   text-align: center;
   position: relative;
   overflow: hidden;
 }
 
+@media (max-width: 900px) {
+  .portal-choice-card {
+    max-width: 720px;
+    padding: 30px 24px 22px;
+    margin: 16px auto 28px;
+    border-radius: 20px;
+  }
+}
+
 @media (max-width: 640px) {
   .portal-choice-card {
-    margin: 8px auto 16px;
-    padding: 20px 14px 18px;
-    border-radius: 18px;
+    max-width: 100%;
+    margin: 6px auto 16px;
+    padding: 18px 12px 16px;
+    border-radius: 16px;
   }
 }
 
@@ -400,30 +432,30 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 26px;
+  margin-bottom: 30px;
 }
 
 .school-seal-crest {
   position: relative;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .seal-inner-ring {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.35), 0 0 0 4px #eff6ff;
-  border: 2px solid #ffffff;
+  box-shadow: 0 10px 25px -4px rgba(37, 99, 235, 0.4), 0 0 0 5px #eff6ff;
+  border: 2.5px solid #ffffff;
 }
 
 .seal-svg {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
 }
 
 .seal-ribbon {
@@ -433,18 +465,27 @@ body {
   transform: translateX(-50%);
   background: #b45309;
   color: #ffffff;
-  font-size: 0.62rem;
+  font-size: 0.64rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  padding: 2px 7px;
+  padding: 2.5px 8px;
   border-radius: 999px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   white-space: nowrap;
 }
 
 .school-header-text {
-  max-width: 640px;
+  max-width: 780px;
   margin: 0 auto;
+}
+
+.school-header-top-badges {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .school-affiliation-pill {
@@ -454,49 +495,86 @@ body {
   background: #fef3c7;
   color: #92400e;
   border: 1px solid #fde68a;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.05em;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 999px;
-  margin-bottom: 8px;
+}
+
+.session-hero-pill {
+  display: inline-flex;
+  align-items: center;
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 999px;
 }
 
 .choice-school-hi {
-  font-size: 1.35rem;
+  font-size: 1.75rem;
   font-weight: 900;
   color: #0f172a;
   line-height: 1.3;
-  margin: 0 0 3px;
-  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+  letter-spacing: -0.015em;
 }
 
 .choice-school-en {
-  font-size: 0.88rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   color: #1e40af;
-  margin: 0 0 4px;
+  margin: 0 0 6px;
 }
 
 .choice-location {
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   font-weight: 600;
   color: #64748b;
   margin: 0 0 10px;
 }
 
+.header-features-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.header-feature-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 11px;
+  border-radius: 999px;
+}
+
+.header-feature-chip svg {
+  color: #10b981;
+}
+
 .choice-divider-line {
-  width: 48px;
+  width: 56px;
   height: 3px;
   background: linear-gradient(90deg, #2563eb, #d97706);
-  border-radius: 2px;
-  margin: 8px auto 10px;
+  border-radius: 999px;
+  margin: 10px auto 12px;
 }
 
 .choice-sub-lead {
-  font-size: 0.84rem;
-  font-weight: 600;
+  font-size: 0.92rem;
+  font-weight: 700;
   color: #334155;
   margin: 0;
 }
@@ -517,6 +595,12 @@ body {
     font-size: 0.76rem;
     letter-spacing: 0.04em;
   }
+  .choice-location {
+    font-size: 0.75rem;
+  }
+  .header-features-row {
+    display: none;
+  }
   .choice-sub-lead {
     font-size: 0.78rem;
   }
@@ -529,32 +613,32 @@ body {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   text-align: left;
 }
 
-@media (min-width: 680px) {
+@media (min-width: 768px) {
   .role-cards-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 28px;
   }
 }
 
 .role-select-box {
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
-  border-radius: 18px;
+  border-radius: 22px;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
 }
 
 .role-card-banner {
-  height: 5px;
+  height: 6px;
   width: 100%;
 }
 
@@ -567,27 +651,28 @@ body {
 }
 
 .role-card-body {
-  padding: 20px 18px 18px;
+  padding: 26px 24px 22px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .role-card-body {
     padding: 16px 14px 14px;
   }
 }
 
 .role-select-box.active-role {
+  background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
   border-color: #bfdbfe;
   cursor: pointer;
 }
 
 .role-select-box.active-role:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
   border-color: #2563eb;
-  box-shadow: 0 16px 32px -8px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 20px 35px -8px rgba(37, 99, 235, 0.22);
 }
 
 .role-select-box.active-role:focus-visible {
@@ -596,53 +681,60 @@ body {
 }
 
 .role-select-box.coming-soon-role {
-  background: #fbfcfe;
-  border-color: #e2e8f0;
+  background: linear-gradient(180deg, #ffffff 0%, #fffdf8 100%);
+  border: 2px dashed #fcd34d;
   cursor: pointer;
 }
 
 .role-select-box.coming-soon-role:hover {
-  transform: translateY(-2px);
-  border-color: #cbd5e1;
-  box-shadow: 0 10px 20px -6px rgba(15, 23, 42, 0.08);
+  transform: translateY(-3px);
+  border-color: #f59e0b;
+  box-shadow: 0 14px 28px -6px rgba(217, 119, 6, 0.14);
 }
 
 .role-badge-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .role-icon-squircle {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.role-icon-squircle svg {
+  width: 26px;
+  height: 26px;
 }
 
 .teacher-squircle {
   background: #eff6ff;
   color: #1e40af;
   border: 1px solid #bfdbfe;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
 }
 
 .student-squircle {
   background: #fffbeb;
   color: #b45309;
   border: 1px solid #fde68a;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.12);
 }
 
 .role-status-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.68rem;
+  gap: 6px;
+  font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0.04em;
-  padding: 4px 10px;
+  letter-spacing: 0.05em;
+  padding: 5px 12px;
   border-radius: 999px;
 }
 
@@ -653,8 +745,8 @@ body {
 }
 
 .live-status-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #10b981;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
@@ -679,11 +771,11 @@ body {
 }
 
 .role-title-wrap {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .role-name {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 900;
   color: #0f172a;
   margin: 0;
@@ -692,46 +784,46 @@ body {
 
 .role-hindi-sub {
   display: block;
-  font-size: 0.74rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #64748b;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .role-desc {
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   color: #475569;
-  line-height: 1.45;
-  margin: 0 0 14px;
+  line-height: 1.5;
+  margin: 0 0 16px;
 }
 
 /* Feature Checklists */
 .role-feature-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 18px;
+  margin: 0 0 22px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   flex-grow: 1;
 }
 
 .role-feature-list li {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  font-size: 0.76rem;
+  gap: 10px;
+  font-size: 0.82rem;
   font-weight: 600;
   color: #1e293b;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .feat-check {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
   color: #059669;
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .feature-list-muted li {
@@ -739,24 +831,34 @@ body {
 }
 
 .feat-clock {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   color: #d97706;
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .role-action-btn {
   width: 100%;
-  height: 46px;
+  height: 50px;
   font-weight: 800;
-  font-size: 0.88rem;
+  font-size: 0.94rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  border-radius: 14px;
+}
+
+.role-select-box.active-role .role-action-btn {
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.3);
+}
+
+.role-select-box.active-role .role-action-btn:hover {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
 }
 
 .role-action-btn.disabled-btn {
@@ -778,25 +880,25 @@ body {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 12px;
-  padding-top: 18px;
-  border-top: 1px solid #f1f5f9;
+  gap: 16px;
+  padding-top: 22px;
+  border-top: 1px solid #e2e8f0;
   color: #64748b;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 600;
 }
 
 .trust-pill-item {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 
 .trust-sep {
   color: #cbd5e1;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .choice-trust-footer {
     gap: 8px;
     font-size: 0.68rem;
@@ -807,24 +909,27 @@ body {
    TEACHER LOGIN SCREEN / CARD
    ========================================================================== */
 .teacher-login-card {
-  max-width: 480px;
+  max-width: 520px;
   width: 100%;
-  margin: 16px auto;
-  padding: 24px 22px;
+  margin: 28px auto 40px;
+  padding: 32px 30px;
   background: #ffffff;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 20px;
-  box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.12);
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  border-radius: 24px;
+  box-shadow: 
+    0 25px 50px -12px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
   box-sizing: border-box;
   text-align: left;
   position: relative;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .teacher-login-card {
+    max-width: 100%;
     margin: 8px auto;
-    padding: 18px 14px;
-    border-radius: 16px;
+    padding: 20px 16px;
+    border-radius: 18px;
   }
 }
 
@@ -832,23 +937,23 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
   border-bottom: 1px solid #f1f5f9;
 }
 
 .login-back-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 999px;
   color: #334155;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
-  padding: 6px 10px;
+  padding: 6px 14px;
   transition: all 0.15s ease;
 }
 
@@ -861,40 +966,40 @@ body {
 .login-badge-mini {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.64rem;
+  gap: 5px;
+  font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   color: #1e40af;
   background: #eff6ff;
   border: 1px solid #bfdbfe;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 999px;
 }
 
 .teacher-login-hero {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
+  gap: 14px;
+  margin-bottom: 22px;
 }
 
 .login-crest-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.3);
 }
 
 .login-crest-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
 }
 
 .teacher-login-header-text {
@@ -902,7 +1007,7 @@ body {
 }
 
 .login-sub-tag {
-  font-size: 0.66rem;
+  font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   color: #1e40af;
@@ -910,16 +1015,16 @@ body {
 }
 
 .teacher-login-title {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 900;
   color: #0f172a;
-  margin: 1px 0 2px;
+  margin: 2px 0 3px;
 }
 
 .teacher-login-subtitle {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
-  line-height: 1.4;
+  line-height: 1.45;
   margin: 0;
 }
 
@@ -1206,10 +1311,10 @@ body {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 8px 8px 80px;
+  padding: 16px 20px 80px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
   min-width: 0;
   overflow-x: hidden;
 }
