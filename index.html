@@ -46,6 +46,14 @@
             <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
           </svg>
         </button>
+
+        <!-- Header Logout Button (visible when teacher logged in) -->
+        <button class="logout-header-btn" id="appBarLogoutBtn" title="Logout from Teacher Portal" aria-label="Logout" style="display: none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+          </svg>
+          <span class="header-logout-text">Logout</span>
+        </button>
       </div>
     </div>
   </header>
@@ -62,11 +70,11 @@
         <span class="teacher-banner-role" id="teacherBannerRole">Computer Teacher</span>
       </div>
     </div>
-    <button class="teacher-logout-touch-btn" id="teacherLogoutBtn" title="Logout / Switch Teacher" aria-label="Switch Teacher">
+    <button class="teacher-logout-touch-btn" id="teacherLogoutBtn" title="Logout from Teacher Portal" aria-label="Logout">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
       </svg>
-      <span>Switch</span>
+      <span>Logout</span>
     </button>
   </aside>
 

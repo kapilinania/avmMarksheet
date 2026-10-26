@@ -222,10 +222,12 @@ function showOtpStep2(realEmail, displayMaskedEmail) {
  */
 function showTeacherBanner(show) {
   const banner = document.getElementById("teacherBanner");
-  if (!banner) return;
+  const appBarLogoutBtn = document.getElementById("appBarLogoutBtn");
 
   if (show && state.currentTeacher) {
-    banner.style.display = "flex";
+    if (banner) banner.style.display = "flex";
+    if (appBarLogoutBtn) appBarLogoutBtn.style.display = "inline-flex";
+
     const nameEl = document.getElementById("teacherBannerName");
     const idEl = document.getElementById("teacherBadgeId");
     const roleEl = document.getElementById("teacherBannerRole");
@@ -243,7 +245,8 @@ function showTeacherBanner(show) {
       avatarEl.textContent = initials || "AV";
     }
   } else {
-    banner.style.display = "none";
+    if (banner) banner.style.display = "none";
+    if (appBarLogoutBtn) appBarLogoutBtn.style.display = "none";
   }
 }
 
@@ -566,6 +569,17 @@ function renderRoster() {
     // ==========================================
     const card = document.createElement("div");
     card.className = "student-card-item";
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
+    card.title = `Click anywhere to update marks for ${student.studentName}`;
+    card.addEventListener("click", () => openMarksModal(student.sno));
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openMarksModal(student.sno);
+      }
+    });
+
     card.innerHTML = `
       <div class="card-header-bar">
         <div class="card-student-details">
@@ -603,7 +617,7 @@ function renderRoster() {
         </div>
       </div>
 
-      <button type="button" class="touch-btn primary btn-card-action" onclick="openMarksModal(${student.sno})">
+      <button type="button" class="touch-btn primary btn-card-action">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
           <path d="M12 20h9"/>
           <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
@@ -617,6 +631,10 @@ function renderRoster() {
     // 2. BUILD DESKTOP TABLE ROW
     // ==========================================
     const tr = document.createElement("tr");
+    tr.className = "student-table-row";
+    tr.title = `Click anywhere to update marks for ${student.studentName}`;
+    tr.addEventListener("click", () => openMarksModal(student.sno));
+
     tr.innerHTML = `
       <td style="font-weight:700; color:#64748b;">${student.sno}</td>
       <td>
@@ -655,7 +673,7 @@ function renderRoster() {
         <span class="card-position-pill ${rankTagClass}">${rankTagText}</span>
       </td>
       <td style="text-align: center;">
-        <button class="touch-btn primary" style="font-size:0.78rem; padding:6px 12px; min-height:36px;" onclick="openMarksModal(${student.sno})">
+        <button class="touch-btn primary" style="font-size:0.78rem; padding:6px 12px; min-height:36px;">
           <span>${hasEnteredMarks ? "Update" : "Enter"}</span>
         </button>
       </td>
@@ -1553,6 +1571,11 @@ function setupEventListeners() {
     teacherLogoutBtn.addEventListener("click", handleTeacherLogout);
   }
 
+  const appBarLogoutBtn = document.getElementById("appBarLogoutBtn");
+  if (appBarLogoutBtn) {
+    appBarLogoutBtn.addEventListener("click", handleTeacherLogout);
+  }
+
   // Return to Class 9 from empty notice
   document.getElementById("returnToClass9Btn").addEventListener("click", () => {
     state.currentClass = "9th";
@@ -1774,16 +1797,17 @@ async function handleResendOtp() {
  */
 function handleTeacherLogout() {
   const teacherName = state.currentTeacher ? state.currentTeacher.name : "Teacher";
-  if (!confirm(`Switch teacher? You will be signed out from (${teacherName}).`)) {
+  if (!confirm(`Are you sure you want to log out from ${teacherName}?`)) {
     return;
   }
 
   if (inactivityTimer) clearTimeout(inactivityTimer);
   localStorage.removeItem("avm_logged_teacher");
   state.currentTeacher = null;
+  closeMarksModal();
   showTeacherBanner(false);
   showPortalChoiceScreen(true);
-  showToast("Signed out successfully.", "warning");
+  showToast("Logged out successfully.", "warning");
 }
 
 /**

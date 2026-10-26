@@ -367,17 +367,50 @@ body {
   text-overflow: ellipsis;
 }
 
+.logout-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  height: 34px;
+}
+
+.logout-header-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.15);
+}
+
+@media (max-width: 480px) {
+  .header-logout-text {
+    display: none;
+  }
+  .logout-header-btn {
+    padding: 5px 8px;
+  }
+}
+
 .teacher-logout-touch-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.15);
+  gap: 5px;
+  background: rgba(239, 68, 68, 0.25);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 6px 10px;
+  border: 1px solid rgba(254, 202, 202, 0.45);
+  padding: 6px 12px;
   border-radius: var(--radius-sm);
-  font-size: 0.74rem;
-  font-weight: 700;
+  font-size: 0.76rem;
+  font-weight: 800;
   cursor: pointer;
   transition: all 0.15s ease;
   min-height: 32px;
@@ -385,7 +418,9 @@ body {
 }
 
 .teacher-logout-touch-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(220, 38, 38, 0.6);
+  border-color: #fecaca;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* ==========================================================================
@@ -1807,6 +1842,21 @@ body {
   gap: 8px;
   box-shadow: var(--shadow-sm);
   overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: rgba(37, 99, 235, 0.08);
+  user-select: none;
+}
+
+.student-card-item:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 6px 20px -3px rgba(37, 99, 235, 0.18);
+  transform: translateY(-2px);
+}
+
+.student-card-item:active {
+  transform: scale(0.99);
+  background: #f8fafc;
 }
 
 .card-header-bar {
@@ -1996,8 +2046,17 @@ body {
   vertical-align: middle;
 }
 
-.native-table tbody tr:hover {
-  background: #f8fafc;
+.native-table tr.student-table-row {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.native-table tbody tr.student-table-row:hover td {
+  background-color: #eff6ff !important;
+}
+
+.native-table tbody tr.student-table-row:active td {
+  background-color: #dbeafe !important;
 }
 
 /* Empty notices */
