@@ -145,6 +145,7 @@ function checkTeacherAuth() {
   state.currentTeacher = null;
   showTeacherBanner(false);
   showPortalChoiceScreen(true);
+  checkBackendConnectivity();
   return false;
 }
 
@@ -308,6 +309,7 @@ async function initConnection() {
   }
 
   showLoadingScreen(true);
+  updateConnectionUI("connecting");
 
   try {
     // 1. Load classes available in sheet
@@ -1507,12 +1509,20 @@ function setupEventListeners() {
   });
 
   // Refresh Sync Button
-  document.getElementById("refreshBtn").addEventListener("click", async () => {
-    showToast("Syncing all classes & roster with Google Sheet...", "warning");
-    await loadAvailableClasses();
-    await loadClassStudents(state.currentClass);
-    showToast("Synced live data with Google Sheet!", "success");
-  });
+  const refreshBtn = document.getElementById("refreshBtn");
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", async () => {
+      showToast("Checking connection with Google Sheet...", "info");
+      updateConnectionUI("connecting");
+      if (state.currentTeacher) {
+        await initConnection();
+        showToast("Synced live data with Google Sheet!", "success");
+      } else {
+        await checkBackendConnectivity();
+        showToast(state.isConnected ? "Connected to Google Sheet!" : "Could not reach Google Sheet.", state.isConnected ? "success" : "warning");
+      }
+    });
+  }
 
   // Disconnected screen retry button
   const retryBtn = document.getElementById("connectSheetBtn");
@@ -1846,15 +1856,50 @@ function showDisconnectedScreen(errorMsg) {
   }
 }
 
-function updateConnectionUI(connected) {
+function updateConnectionUI(status) {
   const pill = document.getElementById("connectionStatus");
   if (!pill) return;
-  if (connected) {
+  const lbl = pill.querySelector(".status-lbl");
+
+  if (status === true || status === "connected") {
     pill.className = "live-status-pill connected";
-    pill.querySelector(".status-lbl").textContent = "Live";
+    if (lbl) lbl.textContent = "Connected";
+    pill.title = "Connected to Google Sheet";
+  } else if (status === "connecting") {
+    pill.className = "live-status-pill connecting";
+    if (lbl) lbl.textContent = "Connecting...";
+    pill.title = "Connecting to Google Sheet...";
   } else {
     pill.className = "live-status-pill disconnected";
-    pill.querySelector(".status-lbl").textContent = "Offline";
+    if (lbl) lbl.textContent = "Disconnected";
+    pill.title = "Disconnected from Google Sheet";
+  }
+}
+
+/**
+ * Ping backend to check connectivity even before teacher logs in
+ */
+async function checkBackendConnectivity() {
+  if (!state.apiUrl) {
+    updateConnectionUI(false);
+    return;
+  }
+
+  updateConnectionUI("connecting");
+  try {
+    const res = await fetch(`${state.apiUrl}?action=ping`, { cache: "no-store" });
+    const json = await res.json();
+    if (json && (json.status === "success" || json.status === "ok" || json.data || json.message)) {
+      state.isConnected = true;
+      updateConnectionUI(true);
+    } else {
+      state.isConnected = false;
+      updateConnectionUI(false);
+    }
+  } catch (err) {
+    console.warn("Backend connectivity check:", err);
+    state.isConnected = false;
+    updateConnectionUI(false);
   }
 }
 
