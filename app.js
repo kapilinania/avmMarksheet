@@ -574,7 +574,15 @@ function renderRoster() {
     card.setAttribute("role", "button");
     card.setAttribute("tabindex", "0");
     card.title = `Click anywhere to update marks for ${student.studentName}`;
-    card.addEventListener("click", () => openMarksModal(student.sno));
+    card.addEventListener("click", (e) => {
+      const marksheetBtn = e.target.closest(".btn-card-marksheet");
+      if (marksheetBtn) {
+        e.stopPropagation();
+        window.openSingleStudentMarksheet(student.sno);
+        return;
+      }
+      openMarksModal(student.sno);
+    });
     card.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -619,13 +627,23 @@ function renderRoster() {
         </div>
       </div>
 
-      <button type="button" class="touch-btn primary btn-card-action">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-          <path d="M12 20h9"/>
-          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-        </svg>
-        <span>${hasEnteredMarks ? "Update Marks" : "Enter Marks"}</span>
-      </button>
+      <div class="card-actions-row">
+        <button type="button" class="touch-btn primary btn-card-action">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+          <span>${hasEnteredMarks ? "Update Marks" : "Enter Marks"}</span>
+        </button>
+        <button type="button" class="btn-card-marksheet" data-sno="${student.sno}" title="Generate Landscape Marksheet">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          <span>Marksheet</span>
+        </button>
+      </div>
     `;
     cardsContainer.appendChild(card);
 
@@ -635,7 +653,15 @@ function renderRoster() {
     const tr = document.createElement("tr");
     tr.className = "student-table-row";
     tr.title = `Click anywhere to update marks for ${student.studentName}`;
-    tr.addEventListener("click", () => openMarksModal(student.sno));
+    tr.addEventListener("click", (e) => {
+      const marksheetBtn = e.target.closest(".btn-table-marksheet");
+      if (marksheetBtn) {
+        e.stopPropagation();
+        window.openSingleStudentMarksheet(student.sno);
+        return;
+      }
+      openMarksModal(student.sno);
+    });
 
     tr.innerHTML = `
       <td style="font-weight:700; color:#64748b;">${student.sno}</td>
@@ -674,9 +700,16 @@ function renderRoster() {
       <td>
         <span class="card-position-pill ${rankTagClass}">${rankTagText}</span>
       </td>
-      <td style="text-align: center;">
-        <button class="touch-btn primary" style="font-size:0.78rem; padding:6px 12px; min-height:36px;">
+      <td style="text-align: center; white-space: nowrap;">
+        <button type="button" class="touch-btn primary" style="font-size:0.75rem; padding:5px 9px; min-height:34px; margin-right:4px;">
           <span>${hasEnteredMarks ? "Update" : "Enter"}</span>
+        </button>
+        <button type="button" class="touch-btn secondary btn-table-marksheet" data-sno="${student.sno}" title="Print Landscape Marksheet" style="font-size:0.75rem; padding:5px 8px; min-height:34px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
         </button>
       </td>
     `;
@@ -1599,11 +1632,49 @@ function setupEventListeners() {
   document.getElementById("nextStudentBtn").addEventListener("click", navigateNextStudent);
   document.getElementById("saveMarksBtn").addEventListener("click", handleSaveMarks);
 
+  // Marksheet Modal event bindings
+  const printClassBtn = document.getElementById("printAllClassMarksheetsBtn");
+  if (printClassBtn) {
+    printClassBtn.addEventListener("click", () => {
+      window.openClassMarksheets();
+    });
+  }
+
+  const modalPrintBtn = document.getElementById("modalPrintMarksheetBtn");
+  if (modalPrintBtn) {
+    modalPrintBtn.addEventListener("click", () => {
+      if (state.selectedStudent) {
+        window.openSingleStudentMarksheet(state.selectedStudent.sno);
+      }
+    });
+  }
+
+  const closeMarksheetBtn = document.getElementById("closeMarksheetModalBtn");
+  if (closeMarksheetBtn) {
+    closeMarksheetBtn.addEventListener("click", () => {
+      const modal = document.getElementById("marksheetModal");
+      if (modal) modal.style.display = "none";
+      document.body.style.overflow = "";
+    });
+  }
+
+  const doPrintBtn = document.getElementById("doPrintMarksheetBtn");
+  if (doPrintBtn) {
+    doPrintBtn.addEventListener("click", () => {
+      window.print();
+    });
+  }
+
   // Close modals on Escape
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       closeMarksModal();
       closeSettingsModal();
+      const msModal = document.getElementById("marksheetModal");
+      if (msModal && msModal.style.display !== "none") {
+        msModal.style.display = "none";
+        document.body.style.overflow = "";
+      }
     }
   });
 }
@@ -1937,4 +2008,361 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+/**
+ * ============================================================================
+ * LANDSCAPE ANNUAL MARKSHEET GENERATION ENGINE (Individual & Whole Class)
+ * ============================================================================
+ */
+
+/**
+ * Open Landscape Marksheet for an Individual Student
+ */
+window.openSingleStudentMarksheet = function(sno) {
+  const student = state.students.find(s => s.sno === Number(sno));
+  if (!student) {
+    showToast("Student records not found.", "error");
+    return;
+  }
+
+  const modal = document.getElementById("marksheetModal");
+  const container = document.getElementById("marksheetPrintContainer");
+  const heading = document.getElementById("marksheetToolbarHeading");
+  const countChip = document.getElementById("marksheetCountChip");
+
+  if (!modal || !container) return;
+
+  heading.textContent = `${student.studentName} — Annual Marksheet`;
+  countChip.textContent = `Individual (SR: ${student.srNo || "—"})`;
+
+  container.innerHTML = buildStudentLandscapeMarksheetHtml(student);
+  modal.style.display = "block";
+  document.body.style.overflow = "hidden";
+};
+
+/**
+ * Open Landscape Marksheet for Entire Class in One Click
+ */
+window.openClassMarksheets = function() {
+  const students = state.students;
+  if (!students || students.length === 0) {
+    showToast(`No student records loaded for Class ${state.currentClass}.`, "warning");
+    return;
+  }
+
+  const modal = document.getElementById("marksheetModal");
+  const container = document.getElementById("marksheetPrintContainer");
+  const heading = document.getElementById("marksheetToolbarHeading");
+  const countChip = document.getElementById("marksheetCountChip");
+
+  if (!modal || !container) return;
+
+  heading.textContent = `Class ${state.currentClass} — Batch Annual Marksheets`;
+  countChip.textContent = `${students.length} Students (Whole Class)`;
+
+  container.innerHTML = students.map(st => buildStudentLandscapeMarksheetHtml(st)).join("");
+  modal.style.display = "block";
+  document.body.style.overflow = "hidden";
+  showToast(`Generated ${students.length} landscape marksheets for Class ${state.currentClass}! Ready to Print / PDF.`, "success");
+};
+
+/**
+ * Helper to safely extract and format mark value or output dash '-'
+ */
+function formatMarkCell(val) {
+  if (val === undefined || val === null || val === "" || isNaN(val)) {
+    return `<span class="mark-dash">—</span>`;
+  }
+  return String(val);
+}
+
+/**
+ * Helper to parse mark as valid number or null
+ */
+function parseMarkNum(val) {
+  if (val === undefined || val === null || val === "" || isNaN(val)) {
+    return null;
+  }
+  return Number(val);
+}
+
+/**
+ * Extract exam score for subject (standard or dual)
+ */
+function getMarksheetSubjectExam(student, subj, examKey) {
+  const examMarks = student.marks && student.marks[examKey] ? student.marks[examKey] : {};
+
+  if (subj.type === "standard") {
+    const maxVal = subj.max[examKey] || 0;
+    const rawVal = examMarks[subj.id];
+    const num = parseMarkNum(rawVal);
+    return {
+      max: maxVal,
+      obt: num,
+      formatted: num !== null ? String(num) : `<span class="mark-dash">—</span>`
+    };
+  } else {
+    const tMax = subj.theoMax[examKey] || 0;
+    const pMax = subj.pracMax[examKey] || 0;
+    const totalMax = tMax + pMax;
+
+    const tVal = parseMarkNum(examMarks[`${subj.id}_theo`]);
+    const pVal = parseMarkNum(examMarks[`${subj.id}_prac`]);
+
+    const hasAny = (tVal !== null || pVal !== null);
+    const sum = hasAny ? ((tVal || 0) + (pVal || 0)) : null;
+
+    return {
+      max: totalMax,
+      obt: sum,
+      formatted: sum !== null ? String(sum) : `<span class="mark-dash">—</span>`
+    };
+  }
+}
+
+/**
+ * Build Single Student Landscape Marksheet HTML String
+ */
+function buildStudentLandscapeMarksheetHtml(student) {
+  const exams = [
+    { key: "firstTest", label: "1st Test" },
+    { key: "secondTest", label: "2nd Test" },
+    { key: "halfYearly", label: "Half-Yearly" },
+    { key: "thirdTest", label: "3rd Test" },
+    { key: "annualExam", label: "Annual Exam" }
+  ];
+
+  let grandMax = 0;
+  let grandObtained = 0;
+  let anyMarksEntered = false;
+
+  let tableRowsHtml = "";
+
+  EVALUATION_SUBJECTS.forEach((subj, idx) => {
+    let subjYearlyMax = 0;
+    let subjYearlyObt = 0;
+    let subjHasMarks = false;
+
+    let cellsHtml = "";
+
+    exams.forEach(ex => {
+      const data = getMarksheetSubjectExam(student, subj, ex.key);
+      subjYearlyMax += data.max;
+
+      if (data.obt !== null) {
+        subjYearlyObt += data.obt;
+        subjHasMarks = true;
+        anyMarksEntered = true;
+      }
+
+      const displayMax = data.max > 0 ? String(data.max) : `<span class="mark-dash">—</span>`;
+      cellsHtml += `
+        <td class="max-cell">${displayMax}</td>
+        <td class="obt-cell">${data.formatted}</td>
+      `;
+    });
+
+    grandMax += subjYearlyMax;
+    if (subjHasMarks) {
+      grandObtained += subjYearlyObt;
+    }
+
+    const yearlyObtFormatted = subjHasMarks ? String(subjYearlyObt) : `<span class="mark-dash">—</span>`;
+    const yearlyGrade = (subjHasMarks && subjYearlyMax > 0)
+      ? computeGrade((subjYearlyObt / subjYearlyMax) * 100)
+      : `<span class="mark-dash">—</span>`;
+
+    tableRowsHtml += `
+      <tr>
+        <td style="font-weight:700; color:#64748b;">${idx + 1}</td>
+        <td class="subj-cell">${escapeHtml(subj.name)}</td>
+        ${cellsHtml}
+        <td class="agg-max-cell">${subjYearlyMax}</td>
+        <td class="agg-obt-cell">${yearlyObtFormatted}</td>
+        <td class="grade-cell">${yearlyGrade}</td>
+      </tr>
+    `;
+  });
+
+  // Calculate Grand Totals & Aggregate Results
+  const overallPercentage = (anyMarksEntered && grandMax > 0)
+    ? ((grandObtained / grandMax) * 100).toFixed(1)
+    : "—";
+
+  const overallGrade = overallPercentage !== "—" ? computeGrade(Number(overallPercentage)) : "—";
+
+  // Rank Calculation
+  const rankVal = student.positions?.finalPosition 
+    || getStudentRankForExam(student, "annualExam") 
+    || getStudentRankForExam(student, "halfYearly") 
+    || "—";
+  const rankDisplay = rankVal && rankVal !== "—" ? `Rank #${rankVal}` : "—";
+
+  // Division / Result status
+  let resultText = "EVALUATION IN PROGRESS";
+  if (overallPercentage !== "—") {
+    const pctNum = Number(overallPercentage);
+    if (pctNum >= 60) {
+      resultText = "PASSED (FIRST DIVISION • प्रथम श्रेणी)";
+    } else if (pctNum >= 45) {
+      resultText = "PASSED (SECOND DIVISION • द्वितीय श्रेणी)";
+    } else if (pctNum >= 33) {
+      resultText = "PASSED (THIRD DIVISION • तृतीय श्रेणी)";
+    } else {
+      resultText = "NEEDS IMPROVEMENT (आवश्यक सुधार)";
+    }
+  }
+
+  const issueDate = new Date().toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
+
+  return `
+    <article class="marksheet-sheet-page">
+      <div class="marksheet-border-frame">
+
+        <!-- 1. Institutional Header -->
+        <header class="ms-header">
+          <div class="ms-logo-col">
+            <img src="vidya_bharati_logo.png" alt="Vidya Bharati" class="ms-emblem-img">
+          </div>
+          <div class="ms-title-col">
+            <span class="ms-motto">।। सा विद्या या विमुक्तये ।।</span>
+            <h1 class="ms-school-name">ADARSH VIDYA MANDIR SECONDARY SCHOOL</h1>
+            <p class="ms-school-sub">SOORSAGAR, JODHPUR (RAJASTHAN) • PH: 0291-2431000</p>
+            <span class="ms-affiliation">Recognized by Govt. of Rajasthan • Affiliated to RBSE (Ajmer)</span>
+            <h2 class="ms-report-title">ANNUAL PROGRESS REPORT &amp; MARKSHEET • SESSION 2026–27</h2>
+          </div>
+          <div class="ms-photo-col">
+            <div class="ms-photo-box">
+              <div class="ms-photo-placeholder">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>PHOTO</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- 2. Student Bio-Data Details (3-Row Grid Table) -->
+        <table class="ms-student-info-table">
+          <tbody>
+            <tr>
+              <td class="info-lbl">Student Name:</td>
+              <td class="info-val strong-val">${escapeHtml(student.studentName)}</td>
+              <td class="info-lbl">Scholar No (SR):</td>
+              <td class="info-val">${escapeHtml(student.srNo || "—")}</td>
+              <td class="info-lbl">Class &amp; Sec:</td>
+              <td class="info-val">${escapeHtml(student.className || state.currentClass)}</td>
+            </tr>
+            <tr>
+              <td class="info-lbl">Father's Name:</td>
+              <td class="info-val">${escapeHtml(student.fatherName || "—")}</td>
+              <td class="info-lbl">Mother's Name:</td>
+              <td class="info-val">${escapeHtml(student.motherName || "—")}</td>
+              <td class="info-lbl">Class Roll No:</td>
+              <td class="info-val">${escapeHtml(student.rollNo || "—")}</td>
+            </tr>
+            <tr>
+              <td class="info-lbl">Date of Birth:</td>
+              <td class="info-val">${escapeHtml(student.dob || "—")}</td>
+              <td class="info-lbl">Gender / Cat:</td>
+              <td class="info-val">${escapeHtml(student.gender || "—")} / ${escapeHtml(student.category || "GEN")}</td>
+              <td class="info-lbl">Student NIC ID:</td>
+              <td class="info-val">${escapeHtml(student.nicId || "—")}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- 3. Academic Marks Table till Yearly Exam -->
+        <table class="ms-marks-table">
+          <thead>
+            <tr>
+              <th rowspan="2" class="th-sno">#</th>
+              <th rowspan="2" class="th-subject">Subject</th>
+              <th colspan="2">1st Periodic</th>
+              <th colspan="2">2nd Periodic</th>
+              <th colspan="2">Half-Yearly</th>
+              <th colspan="2">3rd Periodic</th>
+              <th colspan="2">Annual Exam</th>
+              <th colspan="2" style="background:#0f2b66;">Yearly Total</th>
+              <th rowspan="2" style="width:48px;">Grade</th>
+            </tr>
+            <tr class="sub-head-row">
+              <th>Max</th><th>Obt</th>
+              <th>Max</th><th>Obt</th>
+              <th>Max</th><th>Obt</th>
+              <th>Max</th><th>Obt</th>
+              <th>Max</th><th>Obt</th>
+              <th style="background:#1e3a8a;">Max</th>
+              <th style="background:#1e3a8a;">Obt</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRowsHtml}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th colspan="2" class="total-title">Grand Total (पूर्णांक / प्राप्तांक)</th>
+              <th colspan="10" style="text-align: right; font-weight: 700; color: #475569; padding-right: 10px;">
+                Grand Aggregate Across All Terms:
+              </th>
+              <th class="agg-max-cell" style="font-size:0.8rem;">${grandMax}</th>
+              <th class="total-highlight">${anyMarksEntered ? grandObtained : '<span class="mark-dash">—</span>'}</th>
+              <th class="grade-cell" style="font-size:0.82rem;">${overallGrade}</th>
+            </tr>
+          </tfoot>
+        </table>
+
+        <!-- 4. Co-Scholastic & Assessment Summary -->
+        <div class="ms-coscholastic-row">
+          <div class="co-item">
+            <span class="co-lbl">Overall %:</span>
+            <span class="co-val" style="color:#1e40af; font-size:0.82rem;">${overallPercentage !== "—" ? overallPercentage + "%" : "—"}</span>
+          </div>
+          <div class="co-item">
+            <span class="co-lbl">Class Rank:</span>
+            <span class="co-val rank-highlight">${rankDisplay}</span>
+          </div>
+          <div class="co-item">
+            <span class="co-lbl">Conduct:</span>
+            <span class="co-val">Excellent / उत्तम</span>
+          </div>
+          <div class="co-item">
+            <span class="co-lbl">Result:</span>
+            <span class="co-val result-highlight">${resultText}</span>
+          </div>
+        </div>
+
+        <!-- 5. Signatures & School Seal Footer -->
+        <footer class="ms-footer">
+          <div class="sig-block">
+            <div class="sig-line"></div>
+            <span class="sig-title">Class Teacher</span>
+          </div>
+          <div class="sig-block">
+            <div class="sig-line"></div>
+            <span class="sig-title">Exam Incharge</span>
+          </div>
+          <div class="sig-block seal-block">
+            <div class="school-seal-circle">AVM SEAL</div>
+            <span class="sig-title">Official Stamp</span>
+          </div>
+          <div class="sig-block">
+            <div class="sig-line"></div>
+            <span class="sig-title">Principal / Headmaster</span>
+          </div>
+          <div class="date-issue-block">
+            <span>Issue Date: <strong>${issueDate}</strong></span>
+          </div>
+        </footer>
+
+      </div>
+    </article>
+  `;
 }

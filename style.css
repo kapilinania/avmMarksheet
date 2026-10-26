@@ -2650,3 +2650,642 @@ body {
   from { transform: translateY(-20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+
+/* ==========================================================================
+   LANDSCAPE MARKSHEET SYSTEM (Individual & Batch Class Print)
+   ========================================================================== */
+
+/* Toolbar Print Class Button */
+.roster-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 0 4px;
+}
+
+.roster-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.print-class-touch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  transition: all 0.2s ease;
+  min-height: 36px;
+}
+
+.print-class-touch-btn:hover {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Card Action Buttons (Enter Marks + Marksheet) */
+.card-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.btn-card-marksheet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #f8fafc;
+  color: #1e40af;
+  border: 1.5px solid #bfdbfe;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 9px 12px;
+  min-height: 42px;
+  transition: all 0.15s ease;
+}
+
+.btn-card-marksheet:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+}
+
+/* Modal Print Icon Button in Sheet Top Nav */
+.sheet-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.modal-print-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.modal-print-icon-btn:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1e3a8a;
+}
+
+@media (max-width: 480px) {
+  .btn-text-modal-print {
+    display: none;
+  }
+  .modal-print-icon-btn {
+    padding: 5px 7px;
+  }
+}
+
+/* Marksheet Modal Preview Overlay */
+.marksheet-modal-sheet {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+}
+
+.marksheet-scaffold {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #f1f5f9;
+}
+
+.marksheet-top-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.marksheet-toolbar-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.marksheet-toolbar-title h3 {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.marksheet-count-chip {
+  background: #eff6ff;
+  color: #1e40af;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid #bfdbfe;
+  flex-shrink: 0;
+}
+
+.btn-print-direct {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 8px 18px;
+  min-height: 40px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.marksheet-scroll-viewport {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+/* ==========================================================================
+   LANDSCAPE MARKSHEET SHEET PAGE DESIGN (A4 Landscape 297mm x 210mm)
+   ========================================================================== */
+.marksheet-sheet-page {
+  width: 100%;
+  max-width: 1060px;
+  background: #ffffff;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  box-sizing: border-box;
+  color: #0f172a;
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  position: relative;
+}
+
+.marksheet-border-frame {
+  border: 2.5px solid #1e3a8a;
+  outline: 1.5px solid #b45309;
+  outline-offset: 3px;
+  padding: 14px 16px 12px;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+
+/* Marksheet Header */
+.ms-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 2px solid #1e3a8a;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.ms-logo-col {
+  width: 90px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ms-emblem-img {
+  width: 82px;
+  height: 82px;
+  object-fit: contain;
+}
+
+.ms-title-col {
+  flex: 1;
+  text-align: center;
+  min-width: 0;
+}
+
+.ms-motto {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #b45309;
+  letter-spacing: 0.08em;
+  margin-bottom: 1px;
+}
+
+.ms-school-name {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #1e3a8a;
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.ms-school-sub {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #475569;
+  margin: 1px 0;
+  letter-spacing: 0.03em;
+}
+
+.ms-affiliation {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #0369a1;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 1px 8px;
+  border-radius: 999px;
+  margin: 2px 0;
+}
+
+.ms-report-title {
+  font-size: 0.88rem;
+  font-weight: 900;
+  color: #92400e;
+  background: #fef3c7;
+  display: inline-block;
+  padding: 2px 14px;
+  border: 1px solid #fde68a;
+  border-radius: 4px;
+  margin-top: 3px;
+  letter-spacing: 0.04em;
+}
+
+.ms-photo-col {
+  width: 86px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ms-photo-box {
+  width: 76px;
+  height: 90px;
+  border: 1.5px dashed #94a3b8;
+  border-radius: 4px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ms-photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.58rem;
+  font-weight: 800;
+}
+
+/* Student Bio-Data Table */
+.ms-student-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+  font-size: 0.76rem;
+}
+
+.ms-student-info-table td {
+  padding: 3px 6px;
+  border: 1px solid #cbd5e1;
+  vertical-align: middle;
+}
+
+.ms-student-info-table .info-lbl {
+  width: 12%;
+  font-weight: 700;
+  color: #475569;
+  background: #f8fafc;
+  white-space: nowrap;
+}
+
+.ms-student-info-table .info-val {
+  width: 21.3%;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ms-student-info-table .strong-val {
+  font-weight: 900;
+  color: #1e3a8a;
+  font-size: 0.82rem;
+}
+
+/* Academic Marks Table */
+.ms-marks-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 6px;
+  font-size: 0.74rem;
+  text-align: center;
+}
+
+.ms-marks-table th, 
+.ms-marks-table td {
+  border: 1px solid #64748b;
+  padding: 3px 4px;
+  vertical-align: middle;
+}
+
+.ms-marks-table thead th {
+  background: #1e3a8a;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+.ms-marks-table thead .th-subject {
+  text-align: left;
+  padding-left: 8px;
+  width: 19%;
+}
+
+.ms-marks-table thead .sub-head-row th {
+  background: #2563eb;
+  font-size: 0.68rem;
+  padding: 2px;
+}
+
+.ms-marks-table tbody td.subj-cell {
+  text-align: left;
+  font-weight: 700;
+  color: #0f172a;
+  padding-left: 8px;
+  white-space: nowrap;
+}
+
+.ms-marks-table tbody td.max-cell {
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.72rem;
+}
+
+.ms-marks-table tbody td.obt-cell {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ms-marks-table tbody td.agg-max-cell {
+  background: #eff6ff;
+  color: #1e40af;
+  font-weight: 800;
+}
+
+.ms-marks-table tbody td.agg-obt-cell {
+  background: #fefce8;
+  color: #92400e;
+  font-weight: 900;
+}
+
+.ms-marks-table tbody td.grade-cell {
+  font-weight: 900;
+  color: #0f172a;
+}
+
+/* Total / Grand Aggregate Rows */
+.ms-marks-table tfoot th {
+  background: #f1f5f9;
+  font-weight: 900;
+  font-size: 0.76rem;
+  color: #0f172a;
+  padding: 4px;
+}
+
+.ms-marks-table tfoot .total-title {
+  text-align: left;
+  padding-left: 8px;
+  font-weight: 900;
+  color: #1e3a8a;
+  text-transform: uppercase;
+}
+
+.ms-marks-table tfoot .total-highlight {
+  background: #fef3c7;
+  color: #b45309;
+  font-weight: 900;
+  font-size: 0.82rem;
+}
+
+/* Missing Mark Dash */
+.mark-dash {
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+/* Co-Curricular & Result Strip */
+.ms-coscholastic-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1.3fr 1fr 1.8fr;
+  gap: 6px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  padding: 5px 8px;
+  margin-bottom: 8px;
+  font-size: 0.74rem;
+}
+
+.ms-coscholastic-row .co-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ms-coscholastic-row .co-lbl {
+  font-weight: 700;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.ms-coscholastic-row .co-val {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.ms-coscholastic-row .rank-highlight {
+  color: #b45309;
+  font-weight: 900;
+}
+
+.ms-coscholastic-row .result-highlight {
+  color: #065f46;
+  font-weight: 900;
+}
+
+/* Signatures Footer */
+.ms-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-top: 16px;
+  margin-top: 6px;
+  font-size: 0.72rem;
+}
+
+.ms-footer .sig-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 140px;
+}
+
+.ms-footer .sig-line {
+  width: 100%;
+  border-bottom: 1.5px solid #0f172a;
+  margin-bottom: 4px;
+}
+
+.ms-footer .sig-title {
+  font-weight: 800;
+  color: #334155;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.ms-footer .seal-block {
+  width: 90px;
+}
+
+.ms-footer .school-seal-circle {
+  width: 62px;
+  height: 62px;
+  border: 1.5px dashed #1e3a8a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1e3a8a;
+  font-size: 0.62rem;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 2px;
+  background: #f0f9ff;
+}
+
+.ms-footer .date-issue-block {
+  font-weight: 700;
+  color: #475569;
+  font-size: 0.72rem;
+}
+
+/* ==========================================================================
+   PRINT STYLESHEET (PURE LANDSCAPE A4)
+   ========================================================================== */
+@media print {
+  @page {
+    size: landscape;
+    margin: 6mm 6mm;
+  }
+  
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .mobile-app-bar,
+  .teacher-banner,
+  .app-viewport,
+  #marksModal,
+  .toast-container,
+  .no-print,
+  .marksheet-top-toolbar {
+    display: none !important;
+  }
+
+  .fullscreen-modal-sheet.marksheet-modal-sheet {
+    position: static !important;
+    display: block !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    z-index: 9999 !important;
+  }
+
+  .marksheet-scaffold {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    background: transparent !important;
+  }
+
+  .marksheet-scroll-viewport {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+    gap: 0 !important;
+  }
+
+  .marksheet-sheet-page {
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 0 15mm 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    min-height: 185mm !important;
+    background: #ffffff !important;
+  }
+
+  .marksheet-sheet-page:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
+    margin-bottom: 0 !important;
+  }
+}
