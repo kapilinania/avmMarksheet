@@ -4,30 +4,30 @@
  * ============================================================================
  */
 
-// Subject configurations with bilingual labels & max marks
+// Subject configurations with clean labels & max marks
 const EVALUATION_SUBJECTS = [
-  { id: "hindi", name: "Hindi (हिंदी)", type: "standard", max: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100 } },
-  { id: "english", name: "English (अंग्रेजी)", type: "standard", max: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100 } },
-  { id: "sanskrit", name: "Sanskart (संस्कृत)", type: "standard", max: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100 } },
-  { id: "science", name: "Science (विज्ञान)", type: "standard", max: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100 } },
-  { id: "maths", name: "Mathematics (गणित)", type: "standard", max: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100 } },
-  { id: "socialScience", name: "Social Science (सामाजिक विज्ञान)", type: "standard", max: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100 } },
+  { id: "hindi", name: "Hindi", type: "standard", max: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100 } },
+  { id: "english", name: "English", type: "standard", max: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100 } },
+  { id: "sanskrit", name: "Sanskrit", type: "standard", max: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100 } },
+  { id: "science", name: "Science", type: "standard", max: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100 } },
+  { id: "maths", name: "Mathematics", type: "standard", max: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100 } },
+  { id: "socialScience", name: "Social Science", type: "standard", max: { firstTest: 10, secondTest: 10, halfYearly: 70, thirdTest: 10, annualExam: 100 } },
   {
     id: "physicalEducation",
-    name: "Physical & Health Ed. (शारीरिक शिक्षा)",
+    name: "Physical & Health Education",
     type: "dual",
     theoMax: { firstTest: 10, secondTest: 10, halfYearly: 25, thirdTest: 15, annualExam: 70 },
     pracMax: { firstTest: 8, secondTest: 7, halfYearly: 10, thirdTest: 10, annualExam: 30 }
   },
   {
     id: "itConcept",
-    name: "Concept of IT (सूचना प्रौद्योगिकी)",
+    name: "Concept of Information Technology",
     type: "dual",
     theoMax: { firstTest: 10, secondTest: 10, halfYearly: 50, thirdTest: 10, annualExam: 70 },
     pracMax: { firstTest: 0, secondTest: 0, halfYearly: 20, thirdTest: 0, annualExam: 30 }
   },
-  { id: "supw", name: "SUPW & Social Service (स.उ.उ.का.)", type: "standard", max: { firstTest: 25, secondTest: 0, halfYearly: 45, thirdTest: 0, annualExam: 30 } },
-  { id: "artEducation", name: "Art Education (कला शिक्षा)", type: "standard", max: { firstTest: 25, secondTest: 0, halfYearly: 60, thirdTest: 0, annualExam: 15 } }
+  { id: "supw", name: "SUPW & Social Service", type: "standard", max: { firstTest: 25, secondTest: 0, halfYearly: 45, thirdTest: 0, annualExam: 30 } },
+  { id: "artEducation", name: "Art Education", type: "standard", max: { firstTest: 25, secondTest: 0, halfYearly: 60, thirdTest: 0, annualExam: 15 } }
 ];
 
 // Fallback staff directory matching school records (used offline or when live sheet endpoint is syncing)
@@ -1021,7 +1021,7 @@ function validateAndCalculate() {
       inp.classList.add("field-error");
       if (parentCard) parentCard.classList.add("error-highlight");
       if (errSpan) {
-        errSpan.textContent = `⚠️ Cannot exceed ${max} marks! (अधिकतम अंक ${max})`;
+        errSpan.textContent = `⚠️ Cannot exceed ${max} marks!`;
         errSpan.style.display = "block";
       }
     } else if (num < 0) {
